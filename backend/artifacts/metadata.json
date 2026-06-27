@@ -1,0 +1,711 @@
+[
+  {
+    "question": "What is this project about?",
+    "paraphrases": [
+      "Tell me about this project",
+      "What does this dashboard do?",
+      "Give me an overview",
+      "What is the cyber security dashboard?",
+      "Describe this project",
+      "Explain what this application does",
+      "Summarize this project",
+      "What is the purpose of this app",
+      "What kind of application is this",
+      "What does this system do",
+      "Can you explain this project to me",
+      "What is this tool used for",
+      "Give me a brief introduction to this project",
+      "What is the main idea behind this dashboard"
+    ],
+    "answer": "The Cyber Security API Intelligence Dashboard is a full-stack web app where registered users can search, explore, test, and analyze 20 free Cyber Security APIs covering IP lookup, breach detection, malware analysis, threat intelligence, URL scanning, DNS lookup, WHOIS, and geolocation.",
+    "category": "overview"
+  },
+  {
+    "question": "What is the problem statement?",
+    "paraphrases": [
+      "Why was this project built?",
+      "What problem does this solve?",
+      "What is the purpose of this dashboard?",
+      "Why does this dashboard exist?",
+      "What gap does this project fill?",
+      "What need does this application address?",
+      "What challenge inspired this project?",
+      "Why would someone need this tool?",
+      "What is the motivation behind this project?"
+    ],
+    "answer": "Security researchers and students lack a unified platform to access, test, and compare multiple cyber security APIs. This dashboard solves it by providing API testing, threat analysis, IP/domain investigation, security data visualization, and user activity tracking \u2014 all in one responsive interface.",
+    "category": "overview"
+  },
+  {
+    "question": "What will students learn?",
+    "paraphrases": [
+      "What skills does this project teach?",
+      "What is the educational value?",
+      "What concepts are covered?",
+      "What knowledge does this project provide?",
+      "What does this project help you learn?",
+      "What will I gain from this project?",
+      "What topics does this project cover?",
+      "Is this project good for learning?",
+      "What technical skills are developed?"
+    ],
+    "answer": "Students will learn: API Integration, Cyber Security Concepts, Full Stack Development with Node.js and MongoDB, Authentication Systems using JWT and bcryptjs, and Dashboard Development.",
+    "category": "overview"
+  },
+  {
+    "question": "What are the main objectives?",
+    "paraphrases": [
+      "What are the goals of this project?",
+      "List the project objectives",
+      "What does this project aim to achieve?",
+      "What are the key targets of this project?",
+      "Outline the project goals",
+      "What are the deliverables of this project?",
+      "What milestones does this project have?",
+      "What is this project trying to accomplish?"
+    ],
+    "answer": "10 objectives: 1. Login and Registration with MongoDB  2. Cyber Security Dashboard 3. Integrate 20 free APIs  4. Search and Filter System  5. Bookmark APIs  6. Track user activity  7. Professional API response display  8. Responsive UI with Bootstrap 5  9. Store activity history in MongoDB  10. Educational cyber security research platform.",
+    "category": "overview"
+  },
+  {
+    "question": "What technologies are used?",
+    "paraphrases": [
+      "What is the tech stack?",
+      "What frameworks are used?",
+      "What is this project built with?",
+      "What programming languages are involved?",
+      "Tell me about the frontend framework",
+      "Which libraries power this project?",
+      "Are there any background jobs",
+      "What tools and technologies does this use?",
+      "What language is the backend written in?",
+      "What is the frontend built with?",
+      "What is used for the backend?",
+      "Does this use React or plain JavaScript?",
+      "What runtime does this use?",
+      "Is this built with Node?",
+      "What server framework is used?",
+      "What JS framework is on the frontend?",
+      "Does this project use Express?",
+      "Is Bootstrap used in this project?",
+      "What templating engine is used?"
+    ],
+    "answer": "Frontend: HTML5, CSS3, JavaScript, Bootstrap 5.  Backend: Node.js, Express.js.  Database: MongoDB Atlas.  Authentication: JWT and bcryptjs.  Dev Tools: VS Code, Postman, MongoDB Compass.",
+    "category": "technologies"
+  },
+  {
+    "question": "What database is used?",
+    "paraphrases": [
+      "Where is data stored?",
+      "Which DB does this project use?",
+      "Is MongoDB used?",
+      "What storage system is used?",
+      "Which database technology powers this project?",
+      "Is this project using SQL or NoSQL?",
+      "Is there a cloud database?",
+      "What is MongoDB Atlas?",
+      "Does this use a local or hosted database?",
+      "Is the database relational or document-based?"
+    ],
+    "answer": "MongoDB Atlas (cloud-hosted MongoDB) stores all data. It has three collections: users, security_tools, and activity_logs.",
+    "category": "technologies"
+  },
+  {
+    "question": "How does authentication work?",
+    "paraphrases": [
+      "How is login secured?",
+      "What is JWT used for?",
+      "How are passwords stored?",
+      "How is the session managed?",
+      "How are routes protected",
+      "What protects the API endpoints",
+      "How does the login system work?",
+      "How is access control implemented?",
+      "Explain how sessions are managed",
+      "How do tokens get validated",
+      "How is user identity verified?",
+      "How does password hashing work",
+      "What is bcryptjs used for?",
+      "How does the middleware protect routes?",
+      "What happens after a user logs in?",
+      "How is the JWT token used?",
+      "What does authMiddleware do?",
+      "How does the system know who is logged in?",
+      "What happens if a token is invalid?",
+      "What is the token expiry?",
+      "How is unauthorized access prevented?",
+      "How is bcrypt used?",
+      "Are passwords encrypted or hashed?",
+      "How does the auth system work end to end?"
+    ],
+    "answer": "JWT (JSON Web Tokens) handles session authentication. Passwords are hashed with bcryptjs before storage in MongoDB. An authMiddleware.js file verifies the JWT on every protected route, returning 401 Unauthorized if the token is missing or invalid.",
+    "category": "authentication"
+  },
+  {
+    "question": "What features does the dashboard have?",
+    "paraphrases": [
+      "What can users do on the dashboard?",
+      "List the dashboard features",
+      "What functionality does the dashboard offer?",
+      "What actions are available on the dashboard?",
+      "Describe the dashboard capabilities",
+      "What can I do after logging in?",
+      "What does the main page show?",
+      "What tools are on the dashboard?",
+      "What is available on the home screen?",
+      "What does the dashboard look like?"
+    ],
+    "answer": "The dashboard has: API cards for all 20 tools, a search system (by name, category, type), 10 category filters, a bookmark feature, activity tracking for every user action, and an API testing panel to query APIs directly from the browser.",
+    "category": "features"
+  },
+  {
+    "question": "What are the API categories?",
+    "paraphrases": [
+      "How are the APIs grouped?",
+      "What filter categories exist?",
+      "List all security categories",
+      "What categories can I filter by?",
+      "How many API categories are there?",
+      "What types of APIs are available?",
+      "How is the dashboard organized by category?",
+      "Can I filter by security topic?"
+    ],
+    "answer": "The 10 categories: IP Intelligence, Threat Detection, Malware Analysis, WHOIS Lookup, DNS Analysis, Security Headers, Breach Detection, Email Intelligence, URL Scanning, Geolocation.",
+    "category": "features"
+  },
+  {
+    "question": "Can users bookmark APIs?",
+    "paraphrases": [
+      "Is there a bookmark feature?",
+      "How do users save favorite tools?",
+      "Is there a favorites feature?",
+      "Can I save APIs for later?",
+      "How do I bookmark a tool?",
+      "How do I mark an API as favorite?",
+      "Where are bookmarks stored?",
+      "Can I build a list of favorite APIs?",
+      "How do I access my saved tools?"
+    ],
+    "answer": "Yes. Users can bookmark any API/tool from the dashboard. Bookmarks are stored in MongoDB and viewable on the Profile page.",
+    "category": "features"
+  },
+  {
+    "question": "How does the search work?",
+    "paraphrases": [
+      "How do I search for an API?",
+      "Can I filter the APIs?",
+      "How does the search system work?",
+      "How do I find a specific tool?",
+      "Is there a search bar?",
+      "Can I search by name?",
+      "How do I look up a specific API?",
+      "Can I filter by category?",
+      "How do I narrow down the API list?",
+      "Does the search support filters?"
+    ],
+    "answer": "The search system lets users filter APIs by name, category, or type. There are 10 category filters available on the dashboard for quick navigation.",
+    "category": "features"
+  },
+  {
+    "question": "What are the MongoDB collections?",
+    "paraphrases": [
+      "What is the database structure?",
+      "What schemas are defined?",
+      "How is MongoDB structured?",
+      "What models are in the database?",
+      "How is the database organized",
+      "Describe the schema for the users table",
+      "How is data structured in MongoDB",
+      "Describe the database layout",
+      "What tables or collections exist in the project?",
+      "What fields does the user model have?",
+      "What does the activity log schema look like?",
+      "How is the security tools collection structured?",
+      "What is stored in each collection?",
+      "What are the database models?",
+      "What does the user document contain?"
+    ],
+    "answer": "Three collections:  users {_id, name, email, password, registration_date},  security_tools {_id, name, category, description, api_link, tags},  activity_logs {_id, user_id, tool_id, action_type, timestamp}.",
+    "category": "database"
+  },
+  {
+    "question": "How is user activity tracked?",
+    "paraphrases": [
+      "What does the activity log store?",
+      "How are user actions recorded?",
+      "What is logged in the database?",
+      "How is user activity recorded",
+      "Does the scan history persist",
+      "Where is activity history stored?",
+      "How does the activity logging system work?",
+      "What gets saved when a user performs an action?",
+      "Is there a history of what I have done?",
+      "Can I see my past searches?",
+      "Does the app remember what I tested?",
+      "What is tracked per user?",
+      "Is there an audit trail?",
+      "What actions are logged?",
+      "How does the profile page get its data?"
+    ],
+    "answer": "Every user action is saved in activity_logs with: user_id, tool_id, action_type (search/test/bookmark), and a timestamp. Users can view their full history on the Profile page.",
+    "category": "database"
+  },
+  {
+    "question": "What are all 20 security APIs?",
+    "paraphrases": [
+      "List all the APIs",
+      "Which APIs are integrated?",
+      "Name all 20 tools",
+      "What free APIs are used?",
+      "Which APIs are included",
+      "List all third-party integrations",
+      "Show me every API in the dashboard",
+      "What security tools are available?",
+      "What services are connected?",
+      "How many APIs are there?",
+      "What external APIs does this use?",
+      "Give me the full list of APIs",
+      "What are all the tools in the dashboard?"
+    ],
+    "answer": "1. AbuseIPDB - malicious IP detection  2. VirusTotal - URL and file scanning  3. Have I Been Pwned - breach detection  4. IPinfo - IP geolocation  5. Shodan - internet device search  6. SecurityTrails - DNS intelligence  7. WhoisXML - WHOIS lookup  8. GreyNoise - threat intelligence  9. URLScan - website scanning  10. Hunter.io - email intelligence  11. BuiltWith - technology detection  12. Censys - internet asset intelligence  13. OpenPhish - phishing detection  14. AlienVault OTX - threat platform  15. NVD API - CVE database  16. IPAPI - IP location  17. EmailRep - email reputation  18. DNS Lookup API - DNS records  19. Google Safe Browsing - unsafe sites  20. CVE Details - vulnerability info.",
+    "category": "apis"
+  },
+  {
+    "question": "What is AbuseIPDB?",
+    "paraphrases": [
+      "What does AbuseIPDB do?",
+      "How does AbuseIPDB work?",
+      "Tell me about AbuseIPDB",
+      "Explain AbuseIPDB",
+      "How is malicious IP detection done?",
+      "How do I check if an IP is malicious?",
+      "Can I report a bad IP address?",
+      "How do I look up an IP address reputation?",
+      "Is this IP address safe?",
+      "How can I tell if an IP is dangerous?"
+    ],
+    "answer": "AbuseIPDB detects malicious IP addresses. Submit an IP and it returns a confidence score showing how likely that IP is involved in abuse like spam, DDoS, or hacking.",
+    "category": "apis"
+  },
+  {
+    "question": "What is VirusTotal?",
+    "paraphrases": [
+      "What does VirusTotal do?",
+      "How does VirusTotal scan URLs?",
+      "Tell me about VirusTotal",
+      "Explain VirusTotal",
+      "What does virustotal do",
+      "How does the URL scanner work?",
+      "is there a way to check a website",
+      "how do I scan a website",
+      "can I check if a website is safe",
+      "how do I check a URL",
+      "is there a URL checker",
+      "how do I test a link",
+      "is there a way to scan a website",
+      "how do I check if a site is malicious",
+      "can this scan files for malware?",
+      "how do I check if a file is infected?",
+      "how do I verify if a link is safe?",
+      "is this website dangerous?",
+      "how do I test if a URL is malicious?",
+      "can I check a suspicious link?",
+      "how many antivirus engines does VirusTotal use?"
+    ],
+    "answer": "VirusTotal scans URLs and files against 70+ antivirus engines simultaneously and returns a detailed malware detection report.",
+    "category": "apis"
+  },
+  {
+    "question": "What is Have I Been Pwned?",
+    "paraphrases": [
+      "What does HIBP do?",
+      "How does breach detection work?",
+      "How do I check if my email was leaked?",
+      "Explain Have I Been Pwned",
+      "How can I find out if my data was breached?",
+      "Was my email in a data breach?",
+      "Is there a way to check if my email was hacked?",
+      "How do I know if my account was compromised?",
+      "Can I check if my password was stolen?",
+      "How do I search for my email in breaches?",
+      "Was my data leaked online?",
+      "How do I check for data leaks?"
+    ],
+    "answer": "Have I Been Pwned checks if an email address appears in known data breaches, returning breach names, dates, and the type of data that was exposed.",
+    "category": "apis"
+  },
+  {
+    "question": "What is Shodan?",
+    "paraphrases": [
+      "What does Shodan do?",
+      "How does Shodan work?",
+      "What is Shodan used for?",
+      "Explain Shodan",
+      "How does internet device search work?",
+      "Can I find open ports with Shodan?",
+      "How do I search for exposed devices?",
+      "How do I find vulnerable servers?",
+      "Can I look up what services are running on an IP?",
+      "How do I find exposed infrastructure?",
+      "What can Shodan tell me about a server?"
+    ],
+    "answer": "Shodan is a search engine for internet-connected devices. It finds open ports, exposed services, and device banners \u2014 useful for identifying vulnerable infrastructure.",
+    "category": "apis"
+  },
+  {
+    "question": "What is the NVD API?",
+    "paraphrases": [
+      "What does NVD do?",
+      "What is the CVE vulnerability API?",
+      "How do I look up CVEs?",
+      "Explain the NVD API",
+      "How are vulnerabilities retrieved?",
+      "How do I search for a CVE?",
+      "Can I look up vulnerability scores?",
+      "What is CVSS?",
+      "How do I find patch information for a vulnerability?",
+      "How do I check the severity of a CVE?",
+      "Where does vulnerability data come from?"
+    ],
+    "answer": "The NVD (National Vulnerability Database) API gives access to CVE records including CVSS severity scores, affected software versions, and patch information.",
+    "category": "apis"
+  },
+  {
+    "question": "What is AlienVault OTX?",
+    "paraphrases": [
+      "What does AlienVault OTX do?",
+      "What is OTX?",
+      "Tell me about AlienVault",
+      "Explain OTX threat intelligence",
+      "How does AlienVault work?",
+      "What are indicators of compromise?",
+      "How do I look up threat indicators?",
+      "What is a threat intelligence platform?",
+      "How do I check if a domain is known malicious?",
+      "What is crowd-sourced threat intelligence?"
+    ],
+    "answer": "AlienVault OTX (Open Threat Exchange) is a crowd-sourced threat intelligence platform where researchers share indicators of compromise like malicious IPs, domains, and file hashes.",
+    "category": "apis"
+  },
+  {
+    "question": "What is GreyNoise?",
+    "paraphrases": [
+      "What does GreyNoise do?",
+      "How does GreyNoise work?",
+      "Explain GreyNoise",
+      "How does GreyNoise filter noise?",
+      "How do I tell if traffic is background noise?",
+      "How do I distinguish scanners from attackers?",
+      "Is this IP scanning the internet?",
+      "How does GreyNoise classify IPs?"
+    ],
+    "answer": "GreyNoise identifies IPs that are actively scanning the internet, helping you distinguish background noise from targeted attacks against your systems.",
+    "category": "apis"
+  },
+  {
+    "question": "What is IPinfo?",
+    "paraphrases": [
+      "What does IPinfo do?",
+      "How do I get geolocation for an IP?",
+      "How does IP geolocation work?",
+      "Can I find the location of an IP address?",
+      "How do I look up where an IP is from?",
+      "What country is this IP from?",
+      "How do I geolocate an IP?"
+    ],
+    "answer": "IPinfo provides geolocation data for IP addresses including country, city, ISP, and organization. It helps identify where traffic or threats originate.",
+    "category": "apis"
+  },
+  {
+    "question": "What is SecurityTrails?",
+    "paraphrases": [
+      "What does SecurityTrails do?",
+      "How does DNS intelligence work?",
+      "How do I look up DNS history?",
+      "Can I find historical DNS records?",
+      "What is DNS intelligence?",
+      "How do I track domain changes?",
+      "How does SecurityTrails help investigators?"
+    ],
+    "answer": "SecurityTrails provides DNS intelligence including current and historical DNS records, subdomains, and WHOIS data \u2014 useful for tracking domain infrastructure changes.",
+    "category": "apis"
+  },
+  {
+    "question": "What is WhoisXML?",
+    "paraphrases": [
+      "What does WhoisXML do?",
+      "How does WHOIS lookup work?",
+      "How do I find the owner of a domain?",
+      "Can I look up domain registration info?",
+      "How do I do a WHOIS lookup?",
+      "Who registered this domain?",
+      "How do I find contact info for a domain?"
+    ],
+    "answer": "WhoisXML provides WHOIS lookup data including domain registration details, registrar, creation date, expiry date, and registrant contact information.",
+    "category": "apis"
+  },
+  {
+    "question": "What is URLScan?",
+    "paraphrases": [
+      "What does URLScan do?",
+      "How does URLScan work?",
+      "Can I scan a website for threats?",
+      "How do I analyze a webpage?",
+      "Is there a tool to inspect a website?",
+      "Can I check what a website loads?",
+      "How do I investigate a suspicious URL?",
+      "How do I see what scripts a page runs?"
+    ],
+    "answer": "URLScan scans and analyzes websites, capturing screenshots, DOM content, network requests, and technologies used \u2014 helping identify malicious or suspicious pages.",
+    "category": "apis"
+  },
+  {
+    "question": "What is Hunter.io?",
+    "paraphrases": [
+      "What does Hunter.io do?",
+      "How does email intelligence work?",
+      "Can I find email addresses for a domain?",
+      "How do I look up emails linked to a company?",
+      "Is there a tool for email discovery?",
+      "How do I find corporate email addresses?"
+    ],
+    "answer": "Hunter.io is an email intelligence tool that finds and verifies email addresses associated with a domain \u2014 useful for OSINT investigations and contact discovery.",
+    "category": "apis"
+  },
+  {
+    "question": "What is BuiltWith?",
+    "paraphrases": [
+      "What does BuiltWith do?",
+      "How do I find what technology a website uses?",
+      "Can I detect the tech stack of a website?",
+      "How do I find out what CMS a website uses?",
+      "Is there a way to fingerprint a website?",
+      "How do I identify web technologies?",
+      "What framework does this website use?"
+    ],
+    "answer": "BuiltWith detects the technology stack of any website \u2014 including CMS, frameworks, analytics tools, CDNs, and hosting providers.",
+    "category": "apis"
+  },
+  {
+    "question": "What is OpenPhish?",
+    "paraphrases": [
+      "What does OpenPhish do?",
+      "How does phishing detection work?",
+      "Can I check if a URL is a phishing site?",
+      "How do I detect phishing links?",
+      "Is this website a phishing site?",
+      "How do I report a phishing URL?",
+      "How do I identify fake websites?"
+    ],
+    "answer": "OpenPhish is a phishing detection service that maintains a real-time feed of active phishing URLs to help identify fraudulent websites.",
+    "category": "apis"
+  },
+  {
+    "question": "What is Google Safe Browsing?",
+    "paraphrases": [
+      "What does Google Safe Browsing do?",
+      "How does Google check unsafe sites?",
+      "Can I check if Google flagged a site?",
+      "Is this site on Google's blacklist?",
+      "How do I check if a URL is safe according to Google?",
+      "Does Google have an API for unsafe sites?"
+    ],
+    "answer": "Google Safe Browsing checks URLs against Google's constantly updated lists of unsafe websites including phishing, malware, and deceptive sites.",
+    "category": "apis"
+  },
+  {
+    "question": "What is EmailRep?",
+    "paraphrases": [
+      "What does EmailRep do?",
+      "How do I check email reputation?",
+      "Can I verify if an email is trustworthy?",
+      "Is this email address suspicious?",
+      "How do I check if an email is spam?",
+      "Is there a way to score an email address?"
+    ],
+    "answer": "EmailRep assesses the reputation of email addresses by analyzing associated activity, breach exposure, and online presence to flag suspicious senders.",
+    "category": "apis"
+  },
+  {
+    "question": "What is Censys?",
+    "paraphrases": [
+      "What does Censys do?",
+      "How does Censys work?",
+      "How do I search internet assets with Censys?",
+      "Can I find exposed services with Censys?",
+      "How is Censys different from Shodan?",
+      "How do I use Censys for recon?"
+    ],
+    "answer": "Censys is an internet asset intelligence platform that scans the internet to discover exposed devices, services, and certificates \u2014 useful for attack surface monitoring.",
+    "category": "apis"
+  },
+  {
+    "question": "What is the project workflow?",
+    "paraphrases": [
+      "How does the project work step by step?",
+      "Walk me through the user flow",
+      "What steps does a user follow?",
+      "Describe the end-to-end user journey",
+      "How does a user interact with the system?",
+      "What happens from login to logout?",
+      "What is the user journey?",
+      "Describe the flow of the application"
+    ],
+    "answer": "Workflow: 1. Register with name, email, password  2. Login to receive a JWT token  3. Access the dashboard  4. Search and test security APIs  5. Every action is logged in MongoDB  6. View bookmarks and history on the Profile page  7. Logout to destroy the session.",
+    "category": "workflow"
+  },
+  {
+    "question": "How does registration work?",
+    "paraphrases": [
+      "How do I create an account?",
+      "What happens when a user signs up?",
+      "Walk me through sign up",
+      "how do I sign up",
+      "Steps to create an account",
+      "How do I register on the platform?",
+      "How do I make a new account?",
+      "Describe the file upload process",
+      "How do I reset a password",
+      "How do I change my password?",
+      "What is the sign up process?",
+      "How do I join the platform?",
+      "What info do I need to register?",
+      "What fields are required for registration?",
+      "Can I sign up with Google?",
+      "How do I get access to the dashboard?"
+    ],
+    "answer": "Users provide name, email, and password. The password is hashed with bcryptjs and saved to MongoDB. After registration, the user logs in and receives a JWT token for session access.",
+    "category": "workflow"
+  },
+  {
+    "question": "How does logout work?",
+    "paraphrases": [
+      "How do I log out?",
+      "How is the session ended?",
+      "What happens when I log out?",
+      "How do I sign out?",
+      "Does logging out destroy the token?",
+      "How do I end my session?",
+      "What happens to the JWT on logout?"
+    ],
+    "answer": "Logging out destroys the JWT token on the client side, ending the session. The user is redirected to the login page and cannot access protected routes until they log in again.",
+    "category": "workflow"
+  },
+  {
+    "question": "What is the folder structure?",
+    "paraphrases": [
+      "How is the project organized?",
+      "What files are in the project?",
+      "Show me the directory structure",
+      "What is the file layout of this project?",
+      "Describe the project structure",
+      "Where are the route files?",
+      "Where is the middleware?",
+      "What is in the backend folder?",
+      "Where are the models defined?",
+      "Where is the frontend code?",
+      "How is the codebase organized?"
+    ],
+    "answer": "backend/: server.js, config/db.js, routes/ (authRoutes, apiRoutes, activityRoutes), models/ (User, SecurityTool, Activity), controllers/ (auth, api, activity), middleware/authMiddleware.js, .env.  frontend/: index.html, login.html, register.html, dashboard.html, profile.html, plus css/ js/ images/ folders.",
+    "category": "structure"
+  },
+  {
+    "question": "What npm packages are needed?",
+    "paraphrases": [
+      "What dependencies does this project need?",
+      "Which node modules should I install?",
+      "List the npm packages",
+      "What packages should I install?",
+      "Which libraries are required?",
+      "What are the project dependencies?",
+      "What is in package.json?",
+      "What does npm install download?",
+      "What modules does this project depend on?"
+    ],
+    "answer": "Required packages: express (server), mongoose (MongoDB ORM), bcryptjs (password hashing), jsonwebtoken (JWT auth), cors (cross-origin), dotenv (environment variables), axios (HTTP calls), nodemon (auto-reload).",
+    "category": "installation"
+  },
+  {
+    "question": "How do I install and run the project?",
+    "paraphrases": [
+      "What are the setup steps?",
+      "How do I run this locally?",
+      "What commands do I use?",
+      "how do I run this project",
+      "does this support docker",
+      "show me how to configure environment variables",
+      "How do I get this project running?",
+      "What is the quickstart guide?",
+      "How do I start the server?",
+      "How do I set up the project from scratch?",
+      "What is the installation process?",
+      "How do I clone and run this?",
+      "What environment variables are needed?",
+      "What goes in the .env file?",
+      "How do I connect to MongoDB?",
+      "What is MONGO_URI?",
+      "How do I configure the project?",
+      "How do I launch the backend?",
+      "What is the start command?",
+      "How do I use nodemon?"
+    ],
+    "answer": "1. mkdir CyberSecurity-Dashboard && cd CyberSecurity-Dashboard  2. mkdir backend && cd backend  3. npm init -y  4. npm install express mongoose bcryptjs jsonwebtoken cors dotenv axios nodemon  5. Create .env with MONGO_URI and JWT_SECRET  6. Run: nodemon server.js",
+    "category": "installation"
+  },
+  {
+    "question": "Is the dashboard mobile friendly?",
+    "paraphrases": [
+      "Does this work on mobile?",
+      "Is the UI responsive?",
+      "Will this work on phones?",
+      "is there a mobile version",
+      "does the app support dark mode",
+      "Is this optimized for small screens?",
+      "Can I access this on a tablet?",
+      "Does the layout adapt to screen size?",
+      "Is Bootstrap used for responsiveness?",
+      "What is the UI theme?",
+      "Does it have a dark theme?",
+      "Is the design responsive?"
+    ],
+    "answer": "Yes. Bootstrap 5 makes the entire dashboard fully responsive and mobile-friendly with a modern cyber security dark theme that adapts to all screen sizes.",
+    "category": "nfr"
+  },
+  {
+    "question": "What are the security measures?",
+    "paraphrases": [
+      "How is the project secured?",
+      "What security is implemented?",
+      "How is data protected?",
+      "is rate limiting implemented",
+      "is there logging or monitoring set up",
+      "can multiple users share an account",
+      "How is sensitive data handled?",
+      "What steps are taken to prevent unauthorized access?",
+      "Are API keys hardcoded?",
+      "How are secrets managed?",
+      "Is HTTPS used?",
+      "Are environment variables used for keys?",
+      "How is the .env file used?",
+      "What happens if someone tries to access a protected route without logging in?",
+      "Is there input validation?",
+      "How is the app protected against attacks?"
+    ],
+    "answer": "Security measures: bcryptjs password hashing, JWT authentication with expiry, protected Express routes via authMiddleware, environment variables for all API keys (never hardcoded), and HTTPS for external API calls.",
+    "category": "nfr"
+  },
+  {
+    "question": "What are the performance characteristics?",
+    "paraphrases": [
+      "How fast is the dashboard?",
+      "Is this project scalable?",
+      "What are the non-functional requirements?",
+      "How well does this perform under load?",
+      "Is this app optimized?",
+      "What are the system requirements?",
+      "Can this handle many users?"
+    ],
+    "answer": "The project uses MongoDB Atlas for scalable cloud storage, Express.js for a lightweight backend, and Bootstrap 5 for a fast-loading frontend. It is designed as an educational platform rather than a high-traffic production system.",
+    "category": "nfr"
+  }
+]

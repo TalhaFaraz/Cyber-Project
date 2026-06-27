@@ -1,0 +1,2366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberShield — Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Page layout ── */
+    .main-content { padding: 2rem; overflow-y: auto; }
+
+    .dash-header { margin-bottom: 2rem; }
+    .dash-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+    .dash-sub {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Stats Row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s ease, transform 0.25s ease;
+      will-change: transform;
+    }
+    .stat-card:hover { border-color: var(--border-glow); transform: translateY(-2px); }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 2px; width: 100%;
+      background: var(--card-color, var(--accent-cyan));
+    }
+    .stat-card .big-num {
+      font-family: var(--font-display);
+      font-size: 2rem; font-weight: 700;
+      color: var(--card-color, var(--accent-cyan));
+      line-height: 1; margin-bottom: 0.4rem;
+      transition: transform 0.3s ease;
+    }
+    .stat-card:hover .big-num { transform: scale(1.05); }
+    .stat-card .s-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .stat-card .s-icon {
+      position: absolute; right: 1rem; top: 1rem;
+      font-size: 1.8rem;
+      color: var(--card-color, var(--accent-cyan));
+      opacity: 0.12;
+      transition: opacity 0.25s ease;
+    }
+    .stat-card:hover .s-icon { opacity: 0.22; }
+
+    /* ── Threat level ── */
+    .threat-level-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ── Search row ── */
+    .search-filter-row {
+      display: flex; align-items: center;
+      gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .search-wrapper { flex: 1; min-width: 240px; }
+    .live-indicator {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-mono); font-size: 0.7rem;
+      color: var(--accent-green);
+    }
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent-green);
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    /* ── Category filter ── */
+    .categories-filter {
+      display: flex; flex-wrap: wrap;
+      gap: 0.5rem; margin-bottom: 1.5rem;
+    }
+
+    /* ── API Grid ── */
+    .api-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* ── API Card ── */
+    .api-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s ease, background 0.25s ease,
+                  transform 0.25s ease, box-shadow 0.25s ease;
+      will-change: transform;
+    }
+    .api-card::before {
+      content: '';
+      position: absolute; top: 0; right: 0;
+      width: 80px; height: 80px;
+      background: radial-gradient(circle, rgba(0,212,255,0.08), transparent);
+      pointer-events: none;
+    }
+    .api-card:hover {
+      border-color: var(--border-glow);
+      background: var(--bg-card-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,212,255,0.1);
+    }
+    .api-number {
+      position: absolute; top: 0.75rem; right: 1rem;
+      font-family: var(--font-display); font-size: 1.8rem;
+      color: rgba(0,212,255,0.05); font-weight: 900; line-height: 1;
+    }
+    .api-name {
+      font-family: var(--font-display); font-size: 0.85rem;
+      color: var(--text-primary); margin-bottom: 0.4rem; letter-spacing: 0.05em;
+    }
+    .api-desc {
+      font-family: var(--font-body); font-size: 0.85rem;
+      color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5;
+    }
+    .api-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+    /* ── Buttons ── */
+    .btn-test {
+      font-family: var(--font-display); font-size: 0.6rem;
+      letter-spacing: 0.1em; padding: 0.4rem 0.9rem;
+      border: 1px solid var(--accent-cyan);
+      background: transparent; color: var(--accent-cyan);
+      cursor: pointer;
+      clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .btn-test:hover { background: var(--accent-cyan); color: var(--bg-primary); }
+
+    .btn-visit {
+      font-family: var(--font-display); font-size: 0.6rem;
+      letter-spacing: 0.1em; padding: 0.4rem 0.9rem;
+      border: 1px solid rgba(0,212,255,0.2);
+      background: transparent; color: var(--text-muted);
+      cursor: pointer;
+      clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+    .btn-visit:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+    /* ── BOOKMARK BUTTON — FIXED ── */
+    .bookmark-btn {
+      background: none; border: none;
+      cursor: pointer; font-size: 1rem;
+      padding: 0.25rem 0.35rem;
+      border-radius: 3px;
+      line-height: 1;
+      transition: color 0.2s ease, text-shadow 0.2s ease, transform 0.15s ease;
+      /* default: not bookmarked */
+      color: var(--text-muted);
+    }
+    .bookmark-btn:hover {
+      color: var(--accent-cyan);
+      transform: scale(1.15);
+    }
+    .bookmark-btn.active {
+      color: var(--accent-cyan);
+      text-shadow: 0 0 10px rgba(0,212,255,0.7);
+    }
+    .bookmark-btn.active:hover { color: var(--accent-red); }
+
+    /* ── PDF Button ── */
+    .btn-pdf {
+      font-family: var(--font-display); font-size: 0.6rem;
+      letter-spacing: 0.1em; padding: 0.4rem 0.9rem;
+      border: 1px solid var(--accent-orange);
+      background: transparent; color: var(--accent-orange);
+      cursor: pointer;
+      clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+      transition: background 0.2s ease, color 0.2s ease;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-pdf:hover { background: var(--accent-orange); color: var(--bg-primary); }
+    .btn-pdf:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── PDF Export Toolbar ── */
+    .pdf-toolbar {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--accent-orange);
+      padding: 0.75rem 1.25rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .pdf-toolbar span {
+      font-family: var(--font-mono); font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .pdf-select-all {
+      font-family: var(--font-mono); font-size: 0.72rem;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid rgba(0,212,255,0.3);
+      background: transparent; color: var(--accent-cyan);
+      cursor: pointer; transition: background 0.2s;
+    }
+    .pdf-select-all:hover { background: rgba(0,212,255,0.08); }
+
+    /* card checkbox overlay for PDF mode */
+    .api-card .pdf-check {
+      display: none;
+      position: absolute; top: 0.75rem; left: 0.75rem;
+      width: 18px; height: 18px;
+      border: 1px solid var(--accent-orange);
+      background: var(--bg-card);
+      cursor: pointer;
+      z-index: 5;
+      transition: background 0.15s;
+    }
+    .pdf-mode .api-card .pdf-check { display: flex; align-items: center; justify-content: center; }
+    .pdf-mode .api-card { cursor: pointer; }
+    .api-card.pdf-selected { border-color: var(--accent-orange); box-shadow: 0 0 12px rgba(255,107,43,0.25); }
+    .api-card.pdf-selected .pdf-check { background: var(--accent-orange); }
+    .pdf-check-icon { color: var(--bg-primary); font-size: 0.65rem; display: none; }
+    .api-card.pdf-selected .pdf-check-icon { display: block; }
+
+    /* ── Modal ── */
+    .cyber-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(6px);
+      z-index: 5000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      /* smooth open */
+      animation: overlayIn 0.2s ease;
+    }
+    @keyframes overlayIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .cyber-modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glow);
+      max-width: 700px; width: 100%;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 0 60px rgba(0,212,255,0.2);
+      animation: modalIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes modalIn {
+      from { transform: scale(0.92) translateY(12px); opacity: 0; }
+      to   { transform: scale(1) translateY(0);       opacity: 1; }
+    }
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0;
+      background: var(--bg-card);
+      z-index: 2;
+    }
+    .modal-body { padding: 1.5rem; }
+    .modal-close {
+      background: none; border: none;
+      color: var(--text-muted); cursor: pointer;
+      font-size: 1.2rem; padding: 0.25rem;
+      transition: color 0.2s, transform 0.2s;
+      border-radius: 3px;
+    }
+    .modal-close:hover { color: var(--accent-red); transform: rotate(90deg); }
+
+    /* ── Result area (replaces raw terminal) ── */
+    .result-area-wrap { margin-top: 0.25rem; }
+
+    /* Loading skeleton */
+    .result-skeleton {
+      display: flex; flex-direction: column; gap: 0.6rem;
+      padding: 1rem 0;
+    }
+    .skeleton-line {
+      height: 14px; border-radius: 4px;
+      background: linear-gradient(90deg, var(--bg-card-hover) 25%, rgba(0,212,255,0.06) 50%, var(--bg-card-hover) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Result cards */
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+    }
+    .result-field {
+      background: rgba(0,212,255,0.04);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 0.65rem 0.85rem;
+      transition: border-color 0.2s;
+    }
+    .result-field:hover { border-color: rgba(0,212,255,0.3); }
+    .rf-label {
+      font-family: var(--font-mono); font-size: 0.62rem;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.1em; margin-bottom: 0.3rem;
+    }
+    .rf-value {
+      font-family: var(--font-display); font-size: 0.82rem;
+      color: var(--text-primary); word-break: break-all;
+    }
+    .rf-value.mono {
+      font-family: var(--font-mono); font-size: 0.78rem;
+      font-weight: 400; color: var(--accent-cyan);
+    }
+
+    /* Status pills */
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.3rem 0.85rem; border-radius: 20px;
+      font-family: var(--font-mono); font-size: 0.72rem;
+      font-weight: 600; margin-bottom: 1rem;
+      border: 1px solid currentColor;
+    }
+    .status-safe   { color: var(--accent-green); background: rgba(0,255,136,0.07); }
+    .status-danger { color: var(--accent-red);   background: rgba(255,45,85,0.07); }
+    .status-warn   { color: var(--accent-orange); background: rgba(255,107,43,0.07); }
+    .status-info   { color: var(--accent-cyan);  background: rgba(0,212,255,0.07); }
+
+    /* Score bar */
+    .score-track { height: 5px; background: rgba(0,212,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 1rem; }
+    .score-fill  { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+
+    /* Result section */
+    .result-section { margin-bottom: 1rem; }
+    .result-sec-title {
+      font-family: var(--font-display); font-size: 0.62rem;
+      letter-spacing: 0.15em; color: var(--text-muted);
+      text-transform: uppercase; margin-bottom: 0.5rem;
+      padding-bottom: 0.35rem; border-bottom: 1px solid var(--border-color);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    /* List items */
+    .result-list { display: flex; flex-direction: column; gap: 0.35rem; }
+    .result-list-item {
+      background: rgba(0,212,255,0.03);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 0.85rem;
+      font-family: var(--font-mono); font-size: 0.78rem;
+      color: var(--text-secondary);
+      display: flex; align-items: center; gap: 0.5rem;
+      word-break: break-all;
+      transition: border-color 0.15s;
+    }
+    .result-list-item:hover { border-color: rgba(0,212,255,0.2); }
+    .result-list-item i { color: var(--text-muted); font-size: 0.7rem; flex-shrink: 0; }
+
+    /* Raw JSON toggle */
+    .raw-toggle {
+      font-family: var(--font-mono); font-size: 0.68rem;
+      color: var(--text-muted); cursor: pointer;
+      background: none; border: 1px solid var(--border-color);
+      padding: 0.25rem 0.6rem; transition: all 0.15s;
+      margin-top: 0.75rem;
+    }
+    .raw-toggle:hover { color: var(--text-secondary); border-color: rgba(0,212,255,0.2); }
+    .raw-panel {
+      display: none; background: #010a10;
+      border: 1px solid var(--border-color);
+      padding: 0.85rem; font-family: var(--font-mono);
+      font-size: 0.73rem; color: var(--text-secondary);
+      max-height: 220px; overflow-y: auto;
+      white-space: pre-wrap; word-break: break-all;
+      margin-top: 0.5rem;
+    }
+    .raw-panel.open { display: block; animation: fadeIn 0.15s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+
+    /* Error state */
+    .result-error {
+      border: 1px solid rgba(255,45,85,0.35);
+      background: rgba(255,45,85,0.06);
+      padding: 0.85rem 1rem;
+      font-family: var(--font-mono); font-size: 0.82rem;
+      color: var(--accent-red);
+      display: flex; align-items: flex-start; gap: 0.65rem;
+    }
+    .result-error i { flex-shrink: 0; margin-top: 0.1rem; }
+
+    /* DNS record tag */
+    .dns-type-tag {
+      display: inline-block;
+      font-family: var(--font-display); font-size: 0.58rem;
+      letter-spacing: 0.1em; padding: 0.15rem 0.5rem;
+      background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.25);
+      color: var(--accent-cyan); margin-right: 0.4rem;
+      vertical-align: middle;
+    }
+
+    /* PDF progress overlay */
+    .pdf-progress-overlay {
+      position: fixed; inset: 0;
+      background: rgba(2,12,20,0.92);
+      backdrop-filter: blur(8px);
+      z-index: 9998;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 1.5rem;
+    }
+    .pdf-progress-title {
+      font-family: var(--font-display); font-size: 1rem;
+      color: var(--accent-orange); letter-spacing: 0.1em;
+    }
+    .pdf-progress-bar-wrap {
+      width: 300px; height: 4px;
+      background: rgba(0,212,255,0.1); border-radius: 2px; overflow: hidden;
+    }
+    .pdf-progress-bar-fill {
+      height: 100%; border-radius: 2px;
+      background: var(--accent-orange);
+      transition: width 0.4s ease;
+    }
+    .pdf-progress-label {
+      font-family: var(--font-mono); font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 768px)  { .stats-row { grid-template-columns: 1fr 1fr; } }
+
+    /*Chatbot Styling*/
+    /* ── Avatar Button ─────────────────────────────────────────────────── */
+  #cs-chat-avatar {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: radial-gradient(135deg, #061a2a 0%, #020c14 100%);
+    border: 1.5px solid var(--accent-cyan, #00d4ff);
+    box-shadow:
+      0 0 0 0 rgba(0, 212, 255, 0.4),
+      0 8px 32px rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    animation: cs-pulse-ring 2.6s ease-in-out infinite;
+  }
+  #cs-chat-avatar:hover {
+    transform: scale(1.1);
+    box-shadow:
+      0 0 0 6px rgba(0, 212, 255, 0.15),
+      0 12px 40px rgba(0, 212, 255, 0.25);
+  }
+  #cs-chat-avatar.open {
+    animation: none;
+    transform: scale(0.92);
+    border-color: rgba(0, 212, 255, 0.4);
+  }
+  #cs-chat-avatar .cs-avatar-icon {
+    font-size: 1.4rem;
+    color: var(--accent-cyan, #00d4ff);
+    transition: transform 0.3s ease, opacity 0.2s ease;
+    filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.7));
+  }
+  #cs-chat-avatar.open .cs-avatar-icon {
+    transform: rotate(90deg) scale(0.85);
+    opacity: 0.7;
+  }
+ 
+  @keyframes cs-pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(0,212,255,0.45), 0 8px 32px rgba(0,0,0,0.6); }
+    60%  { box-shadow: 0 0 0 10px rgba(0,212,255,0), 0 8px 32px rgba(0,0,0,0.6); }
+    100% { box-shadow: 0 0 0 0 rgba(0,212,255,0), 0 8px 32px rgba(0,0,0,0.6); }
+  }
+ 
+  /* Notification dot */
+  #cs-notif-dot {
+    position: absolute;
+    top: 4px; right: 4px;
+    width: 10px; height: 10px;
+    background: var(--accent-green, #00ff88);
+    border-radius: 50%;
+    border: 1.5px solid #020c14;
+    animation: cs-blink 1.8s ease-in-out infinite;
+  }
+  @keyframes cs-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+ 
+  /* ── Chat Panel ────────────────────────────────────────────────────── */
+  #cs-chat-panel {
+    position: fixed;
+    bottom: 5.5rem;
+    right: 2rem;
+    width: 360px;
+    height: 500px;
+    background: var(--bg-card, #061a2a);
+    border: 1px solid var(--border-glow, rgba(0,212,255,0.35));
+    box-shadow:
+      0 0 0 1px rgba(0,212,255,0.08),
+      0 24px 64px rgba(0,0,0,0.7),
+      0 0 40px rgba(0,212,255,0.07);
+    z-index: 8999;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Closed state */
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+    pointer-events: none;
+    transform-origin: bottom right;
+    transition:
+      opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
+  }
+  #cs-chat-panel.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+  }
+ 
+  /* ── Panel Header ── */
+  #cs-chat-header {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+    background: linear-gradient(90deg, rgba(0,212,255,0.06) 0%, transparent 100%);
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-shrink: 0;
+  }
+  .cs-header-icon {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    color: var(--accent-cyan, #00d4ff);
+    flex-shrink: 0;
+  }
+  .cs-header-text { flex: 1; }
+  .cs-header-name {
+    font-family: var(--font-display, 'Orbitron', monospace);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    color: #e2f4ff;
+  }
+  .cs-header-status {
+    font-family: var(--font-mono, 'Share Tech Mono', monospace);
+    font-size: 0.62rem;
+    color: var(--accent-green, #00ff88);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.1rem;
+  }
+  .cs-status-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent-green, #00ff88);
+    animation: cs-blink 1.8s ease-in-out infinite;
+  }
+  .cs-close-btn {
+    background: none; border: none;
+    color: rgba(0,212,255,0.4);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.2rem;
+    transition: color 0.15s, transform 0.2s;
+    border-radius: 3px;
+  }
+  .cs-close-btn:hover { color: var(--accent-red, #ff2d55); transform: rotate(90deg); }
+ 
+  /* ── Messages Area ── */
+  #cs-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    scroll-behavior: smooth;
+  }
+  #cs-messages::-webkit-scrollbar { width: 3px; }
+  #cs-messages::-webkit-scrollbar-track { background: transparent; }
+  #cs-messages::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.2); border-radius: 2px; }
+ 
+  /* ── Message Bubbles ── */
+  .cs-msg {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+    animation: cs-msg-in 0.2s ease;
+  }
+  @keyframes cs-msg-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .cs-msg.user { flex-direction: row-reverse; }
+ 
+  .cs-msg-avatar {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.55rem;
+    color: var(--accent-cyan, #00d4ff);
+    flex-shrink: 0;
+  }
+  .cs-msg.user .cs-msg-avatar {
+    background: rgba(0,212,255,0.15);
+    border-color: rgba(0,212,255,0.4);
+    color: var(--accent-cyan, #00d4ff);
+  }
+ 
+  .cs-bubble {
+    max-width: 76%;
+    padding: 0.55rem 0.8rem;
+    font-family: var(--font-mono, 'Share Tech Mono', monospace);
+    font-size: 0.74rem;
+    line-height: 1.55;
+    color: #c8e8ff;
+    background: rgba(0,212,255,0.05);
+    border: 1px solid rgba(0,212,255,0.12);
+    position: relative;
+  }
+  .cs-msg.user .cs-bubble {
+    background: rgba(0,212,255,0.12);
+    border-color: rgba(0,212,255,0.3);
+    color: #e2f4ff;
+    text-align: right;
+  }
+ 
+  /* Typing indicator */
+  .cs-typing {
+    display: flex; gap: 4px; align-items: center;
+    padding: 0.55rem 0.85rem;
+    background: rgba(0,212,255,0.05);
+    border: 1px solid rgba(0,212,255,0.12);
+    width: fit-content;
+  }
+  .cs-typing span {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent-cyan, #00d4ff);
+    animation: cs-typing-dot 1.2s ease-in-out infinite;
+  }
+  .cs-typing span:nth-child(2) { animation-delay: 0.2s; }
+  .cs-typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes cs-typing-dot {
+    0%, 60%, 100% { opacity: 0.2; transform: translateY(0); }
+    30%            { opacity: 1;   transform: translateY(-3px); }
+  }
+ 
+  /* ── Suggested Questions ── */
+  #cs-suggestions {
+    padding: 0 0.85rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex-shrink: 0;
+  }
+  .cs-suggestion-label {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.6rem;
+    color: rgba(0,212,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.1rem;
+  }
+  .cs-suggestion {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.68rem;
+    color: rgba(0,212,255,0.7);
+    background: rgba(0,212,255,0.04);
+    border: 1px solid rgba(0,212,255,0.15);
+    padding: 0.3rem 0.65rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cs-suggestion:hover {
+    background: rgba(0,212,255,0.1);
+    border-color: rgba(0,212,255,0.35);
+    color: var(--accent-cyan, #00d4ff);
+  }
+ 
+  /* ── Input Area ── */
+  #cs-input-area {
+    padding: 0.75rem;
+    border-top: 1px solid rgba(0,212,255,0.12);
+    background: rgba(0,0,0,0.2);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  #cs-input {
+    flex: 1;
+    background: rgba(0,212,255,0.04);
+    border: 1px solid rgba(0,212,255,0.2);
+    color: #e2f4ff;
+    font-family: var(--font-mono, 'Share Tech Mono', monospace);
+    font-size: 0.74rem;
+    padding: 0.5rem 0.7rem;
+    outline: none;
+    transition: border-color 0.2s;
+    border-radius: 0;
+  }
+  #cs-input::placeholder { color: rgba(0,212,255,0.3); }
+  #cs-input:focus { border-color: rgba(0,212,255,0.5); }
+ 
+  #cs-send-btn {
+    width: 34px; height: 34px;
+    background: rgba(0,212,255,0.12);
+    border: 1px solid rgba(0,212,255,0.35);
+    color: var(--accent-cyan, #00d4ff);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem;
+    transition: background 0.15s, transform 0.15s;
+    flex-shrink: 0;
+  }
+  #cs-send-btn:hover:not(:disabled) {
+    background: rgba(0,212,255,0.25);
+    transform: scale(1.05);
+  }
+  #cs-send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+ 
+  /* ── Scanline overlay ── */
+  #cs-chat-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,212,255,0.012) 2px,
+      rgba(0,212,255,0.012) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+  #cs-chat-panel > * { position: relative; z-index: 1; }
+ 
+  /* ── Corner accents ── */
+  #cs-chat-panel::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 12px; height: 12px;
+    border-top: 1.5px solid var(--accent-cyan, #00d4ff);
+    border-left: 1.5px solid var(--accent-cyan, #00d4ff);
+    pointer-events: none;
+    z-index: 2;
+  }
+ 
+  /* Mobile responsive */
+  @media (max-width: 480px) {
+    #cs-chat-panel {
+      right: 0.75rem;
+      width: calc(100vw - 1.5rem);
+      bottom: 5rem;
+    }
+    #cs-chat-avatar { right: 0.75rem; bottom: 1rem; }
+  }
+
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="cyber-nav">
+  <a href="index.html" class="nav-brand">
+    <div class="brand-icon"><i class="fa-solid fa-lock"></i></div>
+    CYBERSHIELD
+  </a>
+  <ul class="nav-links">
+    <li><a href="dashboard.html" class="active">Dashboard</a></li>
+    <li><a href="profile.html">Profile</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div class="live-indicator">
+      <div class="live-dot"></div>
+      <span>LIVE</span>
+    </div>
+    <div id="userDisplay" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-secondary)">—</div>
+    <button class="btn-cyber btn-cyber-red" onclick="logout()" style="padding:0.4rem 1rem;font-size:0.6rem">
+      <i class="fa-solid fa-right-from-bracket"></i> LOGOUT
+    </button>
+  </div>
+</nav>
+
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="cyber-sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <a href="dashboard.html" class="sidebar-item active">
+        <span class="sidebar-icon"><i class="fa-solid fa-gauge"></i></span> Dashboard
+      </a>
+      <a href="profile.html" class="sidebar-item">
+        <span class="sidebar-icon"><i class="fa-solid fa-user-shield"></i></span> My Profile
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Categories</div>
+      <a href="#" class="sidebar-item" onclick="filterCat('IP Intelligence',this);return false">
+        <span class="sidebar-icon"><i class="fa-solid fa-earth-americas"></i></span> IP Intelligence
+      </a>
+      <a href="#" class="sidebar-item" onclick="filterCat('Threat Detection',this);return false">
+        <span class="sidebar-icon"><i class="fa-solid fa-radiation"></i></span> Threat Detection
+      </a>
+      <a href="#" class="sidebar-item" onclick="filterCat('Malware Analysis',this);return false">
+        <span class="sidebar-icon"><i class="fa-solid fa-bug"></i></span> Malware Analysis
+      </a>
+      <a href="#" class="sidebar-item" onclick="filterCat('WHOIS Lookup',this);return false">
+        <span class="sidebar-icon"><i class="fa-solid fa-magnifying-glass"></i></span> WHOIS Lookup
+      </a>
+      <a href="#" class="sidebar-item" onclick="filterCat('DNS Analysis',this);return false">
+        <span class="sidebar-icon"><i class="fa-solid fa-server"></i></span> DNS Analysis
+      </a>
+      <a href="#" class="sidebar-item" onclick="filterCat('Breach Detection',this);return false">
+        <span class="sidebar-icon"><i class="fa-solid fa-database"></i></span> Breach Detection
+      </a>
+      <a href="#" class="sidebar-item" onclick="filterCat('URL Scanning',this);return false">
+        <span class="sidebar-icon"><i class="fa-solid fa-link"></i></span> URL Scanning
+      </a>
+      <a href="#" class="sidebar-item" onclick="filterCat('Email Intelligence',this);return false">
+        <span class="sidebar-icon"><i class="fa-solid fa-envelope"></i></span> Email Intel
+      </a>
+      <a href="#" class="sidebar-item" onclick="filterCat('Vulnerability',this);return false">
+        <span class="sidebar-icon"><i class="fa-solid fa-triangle-exclamation"></i></span> Vulnerabilities
+      </a>
+      <a href="#" class="sidebar-item" onclick="filterCat('Geolocation',this);return false">
+        <span class="sidebar-icon"><i class="fa-solid fa-location-dot"></i></span> Geolocation
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Quick Stats</div>
+      <div style="padding:0 0.5rem">
+        <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-bottom:0.4rem">API Load</div>
+        <div class="cyber-progress"><div class="cyber-progress-bar" style="width:65%"></div></div>
+        <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin:0.75rem 0 0.4rem">DB Status</div>
+        <div class="cyber-progress"><div class="cyber-progress-bar" style="width:88%"></div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content page-wrapper">
+    <div class="dash-header fade-in">
+      <div class="dash-title">SECURITY INTELLIGENCE DASHBOARD</div>
+      <div class="dash-sub">
+        <span class="mono" id="currentTime">--:--:--</span>
+        &nbsp;|&nbsp; 20 APIs Available &nbsp;|&nbsp; 10 Categories
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row fade-in fade-in-delay-1">
+      <div class="stat-card" style="--card-color:var(--accent-cyan)">
+        <div class="s-icon"><i class="fa-solid fa-server"></i></div>
+        <div class="big-num">20</div>
+        <div class="s-label">Active APIs</div>
+      </div>
+      <div class="stat-card" style="--card-color:var(--accent-green)">
+        <div class="s-icon"><i class="fa-solid fa-bookmark"></i></div>
+        <div class="big-num" id="bookmarkCount">0</div>
+        <div class="s-label">Bookmarked</div>
+      </div>
+      <div class="stat-card" style="--card-color:var(--accent-orange)">
+        <div class="s-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        <div class="big-num" id="activityCount">0</div>
+        <div class="s-label">API Calls Today</div>
+      </div>
+      <div class="stat-card" style="--card-color:var(--accent-red)">
+        <div class="s-icon"><i class="fa-solid fa-shield-virus"></i></div>
+        <div class="big-num">10</div>
+        <div class="s-label">Categories</div>
+      </div>
+    </div>
+
+    <!-- Threat Level -->
+    <div class="threat-level-panel fade-in fade-in-delay-2">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+        <div style="font-family:var(--font-display);font-size:0.7rem;letter-spacing:0.15em;color:var(--text-muted)">GLOBAL THREAT LEVEL</div>
+        <div class="badge-cyber badge-threat">ELEVATED</div>
+      </div>
+      <div class="threat-meter">
+        <div class="threat-bar active-low"></div><div class="threat-bar active-low"></div>
+        <div class="threat-bar active-med"></div><div class="threat-bar active-med"></div>
+        <div class="threat-bar active-high"></div>
+        <div class="threat-bar"></div><div class="threat-bar"></div>
+        <div class="threat-bar"></div><div class="threat-bar"></div><div class="threat-bar"></div>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted);margin-top:0.5rem">
+        Level 5/10 — Elevated activity detected in EMEA region. Monitor threat feeds.
+      </div>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="search-filter-row fade-in fade-in-delay-3">
+      <div class="search-wrapper">
+        <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+        <input type="text" class="search-cyber" id="searchInput"
+          placeholder="Search APIs, categories, tools..."
+          oninput="searchAPIs(this.value)">
+      </div>
+      <button class="btn-pdf" id="pdfBtn" onclick="togglePDFMode()" title="Export selected API cards to PDF">
+        <i class="fa-solid fa-file-pdf"></i> EXPORT PDF
+      </button>
+      <div id="resultCount" style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);white-space:nowrap">
+        Showing 20 results
+      </div>
+    </div>
+
+    <!-- PDF Selection Toolbar (hidden by default) -->
+    <div class="pdf-toolbar" id="pdfToolbar" style="display:none">
+      <i class="fa-solid fa-file-pdf" style="color:var(--accent-orange)"></i>
+      <span id="pdfSelectionLabel">Select API cards to include in the PDF report</span>
+      <button class="pdf-select-all" onclick="selectAllForPDF()">Select All</button>
+      <button class="pdf-select-all" onclick="clearPDFSelection()">Clear</button>
+      <button class="btn-pdf" id="generatePdfBtn" onclick="generatePDF()" style="margin-left:auto" disabled>
+        <i class="fa-solid fa-download"></i> GENERATE PDF
+      </button>
+      <button class="btn-cyber" onclick="cancelPDFMode()" style="padding:0.35rem 0.9rem;font-size:0.6rem">
+        CANCEL
+      </button>
+    </div>
+
+    <!-- Category Pills -->
+    <div class="categories-filter fade-in fade-in-delay-4" id="categoryFilter">
+      <button class="category-pill active" onclick="filterCat('all',this)">All APIs</button>
+      <button class="category-pill" onclick="filterCat('IP Intelligence',this)">IP Intelligence</button>
+      <button class="category-pill" onclick="filterCat('Threat Detection',this)">Threat Detection</button>
+      <button class="category-pill" onclick="filterCat('Malware Analysis',this)">Malware Analysis</button>
+      <button class="category-pill" onclick="filterCat('WHOIS Lookup',this)">WHOIS Lookup</button>
+      <button class="category-pill" onclick="filterCat('DNS Analysis',this)">DNS Analysis</button>
+      <button class="category-pill" onclick="filterCat('Breach Detection',this)">Breach Detection</button>
+      <button class="category-pill" onclick="filterCat('URL Scanning',this)">URL Scanning</button>
+      <button class="category-pill" onclick="filterCat('Email Intelligence',this)">Email Intel</button>
+      <button class="category-pill" onclick="filterCat('Vulnerability',this)">Vulnerability</button>
+      <button class="category-pill" onclick="filterCat('Geolocation',this)">Geolocation</button>
+    </div>
+
+    <!-- API Grid -->
+    <div class="api-grid" id="apiGrid"></div>
+  </main>
+</div>
+
+<!-- ── Test Modal ── -->
+<div class="cyber-modal-overlay" id="testModal" style="display:none">
+  <div class="cyber-modal">
+    <div class="modal-header">
+      <div>
+        <div style="font-family:var(--font-display);font-size:0.9rem;color:var(--text-primary)" id="modalTitle">API TEST PANEL</div>
+        <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted)" id="modalSub">Enter query below</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="input-group-cyber">
+        <label class="input-label" id="inputLabel">Query Input</label>
+        <input type="text" class="cyber-input" id="testInput" placeholder="">
+        <div class="input-bar"></div>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-top:-1rem;margin-bottom:1rem" id="queryHint"></div>
+      <div style="display:flex;gap:0.75rem;margin-bottom:1.25rem">
+        <button class="btn-cyber btn-cyber-green" onclick="runTest()" id="runBtn">
+          <i class="fa-solid fa-play"></i> EXECUTE QUERY
+        </button>
+        <button class="btn-cyber" onclick="clearResult()">
+          <i class="fa-solid fa-trash"></i> CLEAR
+        </button>
+      </div>
+      <div class="section-title">RESPONSE OUTPUT</div>
+      <div class="result-area-wrap" id="resultAreaWrap">
+        <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);padding:0.5rem 0">
+          // Ready — enter a query and execute
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PDF Progress Overlay ── -->
+<div class="pdf-progress-overlay" id="pdfOverlay" style="display:none">
+  <i class="fa-solid fa-file-pdf" style="font-size:2.5rem;color:var(--accent-orange)"></i>
+  <div class="pdf-progress-title">GENERATING PDF REPORT</div>
+  <div class="pdf-progress-bar-wrap">
+    <div class="pdf-progress-bar-fill" id="pdfProgressFill" style="width:0%"></div>
+  </div>
+  <div class="pdf-progress-label" id="pdfProgressLabel">Preparing report...</div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+
+<!-- ── Floating Avatar Button ── -->
+<div id="cs-chat-avatar" onclick="csChatToggle()" title="Ask CyberShield AI">
+  <i class="fa-solid fa-shield-halved cs-avatar-icon"></i>
+  <div id="cs-notif-dot"></div>
+</div>
+ 
+<!-- ── Chat Panel ── -->
+<div id="cs-chat-panel">
+ 
+  <!-- Header -->
+  <div id="cs-chat-header">
+    <div class="cs-header-icon">
+      <i class="fa-solid fa-shield-halved"></i>
+    </div>
+    <div class="cs-header-text">
+      <div class="cs-header-name">CYBERSHIELD AI</div>
+      <div class="cs-header-status">
+        <div class="cs-status-dot"></div>
+        ONLINE — Ask me anything
+      </div>
+    </div>
+    <button class="cs-close-btn" onclick="csChatToggle()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+ 
+  <!-- Messages -->
+  <div id="cs-messages">
+    <!-- Welcome message injected by JS -->
+  </div>
+ 
+  <!-- Suggested Questions -->
+  <div id="cs-suggestions"></div>
+ 
+  <!-- Input -->
+  <div id="cs-input-area">
+    <input
+      id="cs-input"
+      type="text"
+      placeholder="Ask about this project..."
+      onkeydown="if(event.key==='Enter') csSend()"
+      autocomplete="off"
+    />
+    <button id="cs-send-btn" onclick="csSend()" title="Send">
+      <i class="fa-solid fa-paper-plane"></i>
+    </button>
+  </div>
+</div>
+ 
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════════
+   AUTH STORAGE HELPERS
+   Token + user live in sessionStorage so they are cleared when the tab closes,
+   forcing a fresh login on a newly opened tab. Bookmarks / activity stay in
+   localStorage (per-device data, not auth) so they persist across sessions.
+════════════════════════════════════════════════════════════════════════════ */
+function getToken() { return sessionStorage.getItem('token'); }
+function getUser()  { try { return JSON.parse(sessionStorage.getItem('user') || '{}'); } catch (e) { return {}; } }
+function clearAuth() {
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   DATA
+════════════════════════════════════════════════════════════════════════════ */
+const APIs = [
+  { id:1,  name:'AbuseIPDB',          category:'IP Intelligence',    desc:'Check if an IP has been reported for malicious activity across the internet.',            url:'https://www.abuseipdb.com',         endpoint:'/api/security/abuseipdb',      inputLabel:'IP Address',        placeholder:'e.g. 8.8.8.8',            hint:'Enter any public IPv4 address',                        tags:['ip','abuse','malicious'] },
+  { id:2,  name:'VirusTotal',          category:'Malware Analysis',   desc:'Scan URLs and domains against 70+ antivirus engines simultaneously.',                     url:'https://www.virustotal.com',        endpoint:'/api/security/virustotal',     inputLabel:'Domain / URL',      placeholder:'e.g. example.com',        hint:'Enter domain (without https://)',                       tags:['virus','malware','scan'] },
+  { id:3,  name:'Have I Been Pwned',   category:'Breach Detection',   desc:'Check if an email address has been exposed in known data breaches.',                      url:'https://haveibeenpwned.com',        endpoint:'/api/security/hibp',           inputLabel:'Email Address',     placeholder:'e.g. test@example.com',   hint:'Enter a full email address',                           tags:['breach','email','pwned'] },
+  { id:4,  name:'IPinfo',              category:'IP Intelligence',    desc:'Comprehensive IP geolocation, ASN, company, and carrier information lookup.',             url:'https://ipinfo.io',                 endpoint:'/api/security/ipinfo',         inputLabel:'IP Address',        placeholder:'e.g. 1.1.1.1',            hint:'Enter any public IPv4 address',                        tags:['ip','geo','info'] },
+  { id:5,  name:'Shodan',              category:'Threat Detection',   desc:'Open ports, hostnames and vulnerability data for any public IP (InternetDB).',           url:'https://www.shodan.io',             endpoint:'/api/security/shodan',         inputLabel:'IP Address',        placeholder:'e.g. 8.8.8.8',            hint:'Enter a public IPv4 address',                          tags:['shodan','devices','iot'] },
+  { id:6,  name:'SecurityTrails',      category:'DNS Analysis',       desc:'Historical DNS records and domain intelligence (falls back to HackerTarget).',           url:'https://securitytrails.com',        endpoint:'/api/security/securitytrails', inputLabel:'Domain Name',       placeholder:'e.g. google.com',         hint:'Enter a domain name',                                  tags:['dns','domain','history'] },
+  { id:7,  name:'WhoisXML / RDAP',     category:'WHOIS Lookup',       desc:'Domain registration, registrar, expiry and nameserver information via RDAP.',           url:'https://www.whoisxmlapi.com',       endpoint:'/api/security/whois',          inputLabel:'Domain Name',       placeholder:'e.g. github.com',         hint:'Enter a domain name',                                  tags:['whois','domain','registrar'] },
+  { id:8,  name:'GreyNoise',           category:'Threat Detection',   desc:'Classify if an IP is a scanner, benign crawler, or unknown on the internet.',           url:'https://www.greynoise.io',          endpoint:'/api/security/greynoise',      inputLabel:'IP Address',        placeholder:'e.g. 45.33.32.156',       hint:'Must be a routable public IPv4',                       tags:['threat','noise','scanning'] },
+  { id:9,  name:'URLScan',             category:'URL Scanning',       desc:'Search public URL scans for screenshots, tech stack and security headers.',              url:'https://urlscan.io',                endpoint:'/api/security/urlscan',        inputLabel:'URL / Domain',      placeholder:'e.g. https://example.com', hint:'Enter a URL or domain to look up',                   tags:['url','scan','web'] },
+  { id:10, name:'Hunter.io',           category:'Email Intelligence', desc:'Find email addresses associated with a domain (falls back to HackerTarget).',           url:'https://hunter.io',                 endpoint:'/api/security/hunter',         inputLabel:'Domain Name',       placeholder:'e.g. stripe.com',         hint:'Enter a domain to find associated emails',             tags:['email','hunter','domain'] },
+  { id:11, name:'BuiltWith',           category:'Threat Detection',   desc:'Detect technologies used by a website from its HTTP headers.',                          url:'https://builtwith.com',             endpoint:'/api/security/builtwith',      inputLabel:'Domain Name',       placeholder:'e.g. shopify.com',        hint:'Enter a domain name',                                  tags:['tech','stack','web'] },
+  { id:12, name:'Censys / InternetDB', category:'IP Intelligence',    desc:'Open ports, hostnames and CVEs for any public IP via Shodan InternetDB.',              url:'https://censys.io',                 endpoint:'/api/security/censys',         inputLabel:'IP Address',        placeholder:'e.g. 8.8.4.4',            hint:'Enter a public IPv4 address',                          tags:['censys','scan','host'] },
+  { id:13, name:'OpenPhish',           category:'URL Scanning',       desc:'Real-time phishing URL detection from the OpenPhish community intelligence feed.',     url:'https://openphish.com',             endpoint:'/api/security/openphish',      inputLabel:'URL / Domain',      placeholder:'e.g. suspicious-site.com', hint:'Enter a URL or domain to check',                     tags:['phishing','url','feed'] },
+  { id:14, name:'AlienVault OTX',      category:'Threat Detection',   desc:'Open threat exchange — check IPs, domains and file hashes for known IoCs.',            url:'https://otx.alienvault.com',        endpoint:'/api/security/otx',            inputLabel:'IP / Domain / Hash', placeholder:'e.g. 8.8.8.8',           hint:'IP, domain, or MD5/SHA1/SHA256 hash',                  tags:['threat','ioc','alienvault'] },
+  { id:15, name:'NVD API',             category:'Vulnerability',      desc:'Search the National Vulnerability Database for CVEs and CVSS scores.',                 url:'https://nvd.nist.gov',              endpoint:'/api/security/nvd',            inputLabel:'CVE ID / Keyword',  placeholder:'e.g. CVE-2021-44228',     hint:'Enter a CVE ID or a product keyword',                  tags:['cve','nvd','vulnerability'] },
+  { id:16, name:'IPAPI',               category:'Geolocation',        desc:'Fast IP geolocation with country, city, timezone, ASN and ISP details.',              url:'https://ipapi.co',                  endpoint:'/api/security/ipapi',          inputLabel:'IP Address',        placeholder:'e.g. 1.1.1.1',            hint:'Enter any public IPv4 address',                        tags:['ip','location','geo'] },
+  { id:17, name:'EmailRep',            category:'Email Intelligence', desc:'Email reputation score — detect disposable, malicious or spoofed addresses.',          url:'https://emailrep.io',               endpoint:'/api/security/emailrep',       inputLabel:'Email Address',     placeholder:'e.g. test@gmail.com',     hint:'Enter a full email address',                           tags:['email','reputation','spam'] },
+  { id:18, name:'DNS Lookup',          category:'DNS Analysis',       desc:'Query A, MX, NS, TXT, CNAME, AAAA and SOA records for any domain in real-time.',      url:'https://dns.google',                endpoint:'/api/security/dns',            inputLabel:'Domain Name',       placeholder:'e.g. cloudflare.com',     hint:'Enter a domain to fetch all DNS records',              tags:['dns','records','lookup'] },
+  { id:19, name:'Google Safe Browsing',category:'URL Scanning',       desc:"Check URLs against Google's threat lists for malware and phishing (OpenPhish fallback).", url:'https://safebrowsing.google.com', endpoint:'/api/security/safebrowsing',   inputLabel:'URL',               placeholder:'e.g. https://example.com', hint:'Enter a full URL to check its safety',               tags:['google','safe','phishing'] },
+  { id:20, name:'CVE Details',         category:'Vulnerability',      desc:'Detailed CVE lookup with CVSS score, severity rating and affected products.',         url:'https://www.cvedetails.com',        endpoint:'/api/security/cvedetails',     inputLabel:'CVE ID / Keyword',  placeholder:'e.g. CVE-2023-44487',     hint:'Enter a CVE ID or product keyword',                    tags:['cve','details','severity'] },
+];
+
+const CAT_COLORS = {
+  'IP Intelligence':'badge-ip','Malware Analysis':'badge-malware','Breach Detection':'badge-breach',
+  'Threat Detection':'badge-threat','DNS Analysis':'badge-dns','WHOIS Lookup':'badge-whois',
+  'URL Scanning':'badge-url','Email Intelligence':'badge-email','Vulnerability':'badge-vuln','Geolocation':'badge-geo'
+};
+
+/* ════════════════════════════════════════════════════════════════════════════
+   BOOKMARK STATE — drop-in replacement for the existing block in dashboard.html
+════════════════════════════════════════════════════════════════════════════ */
+const BM_KEY = 'cs_bookmarks';
+
+function getBookmarks() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(BM_KEY) || '[]');
+    // Force every stored id to a Number so old/mixed-type entries don't silently fail .includes()
+    return raw.map(Number);
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveBookmarks(bm) {
+  localStorage.setItem(BM_KEY, JSON.stringify(bm));
+}
+
+function isBookmarked(id) {
+  return getBookmarks().includes(Number(id));
+}
+
+function toggleBookmark(id) {
+  id = Number(id);
+  const bm = getBookmarks();
+  const idx = bm.indexOf(id);
+  const added = idx === -1;
+  if (added) bm.push(id); else bm.splice(idx, 1);
+  saveBookmarks(bm);
+  syncBookmarkUI();                 // patch buttons already in the DOM
+  showToast(added ? 'API bookmarked ✓' : 'Bookmark removed', added ? 'success' : 'info');
+  logActivity(id, 'bookmark');
+}
+
+function syncBookmarkUI() {
+  document.querySelectorAll('.bookmark-btn[data-id]').forEach(btn => {
+    const id = Number(btn.dataset.id);
+    const active = isBookmarked(id);
+    const icon = btn.querySelector('i');
+
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    btn.title = active ? 'Remove bookmark' : 'Bookmark this API';
+
+    if (icon) {
+      icon.className = active ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark';
+      // Belt-and-suspenders: force the visible color directly so the change
+      // is never silently swallowed by a missing/overridden .active rule.
+      icon.style.color = active ? 'var(--accent-cyan)' : '';
+    }
+  });
+
+  const countEl = document.getElementById('bookmarkCount');
+  if (countEl) countEl.textContent = getBookmarks().length;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ACTIVITY COUNT
+════════════════════════════════════════════════════════════════════════════ */
+const AC_KEY = 'cs_activity_count';
+function getActivityCount()   { return parseInt(localStorage.getItem(AC_KEY) || '0'); }
+function incActivityCount()   {
+  const n = getActivityCount() + 1;
+  localStorage.setItem(AC_KEY, n);
+  document.getElementById('activityCount').textContent = n;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   RENDER CARDS
+════════════════════════════════════════════════════════════════════════════ */
+let currentFilter = 'all';
+let currentSearch = '';
+
+function renderAPIs(list) {
+  const grid = document.getElementById('apiGrid');
+  const count = list.length;
+  document.getElementById('resultCount').textContent =
+    `Showing ${count} result${count !== 1 ? 's' : ''}`;
+
+  // Build HTML string — no individual DOM calls during render
+  const html = list.map((api, i) => `
+    <div class="api-card fade-in ${pdfSelectedIds.has(api.id) ? 'pdf-selected' : ''}"
+         style="animation-delay:${Math.min(i * 0.04, 0.5)}s"
+         data-api-id="${api.id}"
+         onclick="handleCardClick(${api.id}, event)">
+
+      <!-- PDF checkbox overlay -->
+      <div class="pdf-check">
+        <i class="fa-solid fa-check pdf-check-icon"></i>
+      </div>
+
+      <div class="api-number">${String(api.id).padStart(2,'0')}</div>
+
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem">
+        <div class="badge-cyber ${CAT_COLORS[api.category] || 'badge-ip'}">${api.category}</div>
+        <button
+          class="bookmark-btn ${isBookmarked(api.id) ? 'active' : ''}"
+          data-id="${api.id}"
+          onclick="event.stopPropagation(); toggleBookmark(${api.id})"
+          title="${isBookmarked(api.id) ? 'Remove bookmark' : 'Bookmark this API'}">
+          <i class="${isBookmarked(api.id) ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
+        </button>
+      </div>
+
+      <div class="api-name">${api.name}</div>
+      <div class="api-desc">${api.desc}</div>
+
+      <div class="api-actions">
+        <button class="btn-test" onclick="event.stopPropagation(); openTest(${api.id})">
+          <i class="fa-solid fa-terminal" style="margin-right:0.3rem"></i>TEST API
+        </button>
+        <button class="btn-visit" onclick="event.stopPropagation(); window.open('${api.url}','_blank')">
+          <i class="fa-solid fa-arrow-up-right-from-square" style="margin-right:0.3rem"></i>VISIT
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  grid.innerHTML = html;
+  // Apply pdf-mode class if needed
+  grid.classList.toggle('pdf-mode', pdfMode);
+}
+
+function searchAPIs(q) {
+  currentSearch = q.toLowerCase();
+  applyFilters();
+}
+
+function filterCat(cat, btn) {
+  currentFilter = cat;
+  // Sync pill active states
+  document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    const pills = document.querySelectorAll('.category-pill');
+    pills.forEach(p => { if (p.textContent.trim() === cat || (cat === 'all' && p.textContent.trim() === 'All APIs')) p.classList.add('active'); });
+  }
+  document.getElementById('searchInput').value = '';
+  currentSearch = '';
+  applyFilters();
+}
+
+function applyFilters() {
+  let list = APIs;
+  if (currentFilter !== 'all') list = list.filter(a => a.category.includes(currentFilter));
+  if (currentSearch) list = list.filter(a =>
+    a.name.toLowerCase().includes(currentSearch) ||
+    a.category.toLowerCase().includes(currentSearch) ||
+    a.desc.toLowerCase().includes(currentSearch) ||
+    a.tags.some(t => t.includes(currentSearch))
+  );
+  renderAPIs(list);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PDF MODE
+════════════════════════════════════════════════════════════════════════════ */
+let pdfMode = false;
+let pdfSelectedIds = new Set();
+
+function togglePDFMode() {
+  pdfMode = !pdfMode;
+  if (pdfMode) {
+    document.getElementById('pdfToolbar').style.display = 'flex';
+    document.getElementById('apiGrid').classList.add('pdf-mode');
+    document.getElementById('pdfBtn').innerHTML = '<i class="fa-solid fa-xmark"></i> CANCEL PDF';
+    showToast('Click cards to select them for the PDF report', 'info');
+  } else {
+    cancelPDFMode();
+  }
+  applyFilters(); // re-render
+}
+
+function cancelPDFMode() {
+  pdfMode = false;
+  pdfSelectedIds.clear();
+  document.getElementById('pdfToolbar').style.display = 'none';
+  document.getElementById('apiGrid').classList.remove('pdf-mode');
+  document.getElementById('pdfBtn').innerHTML = '<i class="fa-solid fa-file-pdf"></i> EXPORT PDF';
+  applyFilters();
+}
+
+function handleCardClick(id, event) {
+  if (!pdfMode) return;
+  if (pdfSelectedIds.has(id)) pdfSelectedIds.delete(id);
+  else pdfSelectedIds.add(id);
+  updatePDFSelectionUI();
+  applyFilters();
+}
+
+function selectAllForPDF() {
+  APIs.forEach(a => pdfSelectedIds.add(a.id));
+  updatePDFSelectionUI();
+  applyFilters();
+}
+
+function clearPDFSelection() {
+  pdfSelectedIds.clear();
+  updatePDFSelectionUI();
+  applyFilters();
+}
+
+function updatePDFSelectionUI() {
+  const n = pdfSelectedIds.size;
+  document.getElementById('pdfSelectionLabel').textContent =
+    n === 0 ? 'Select API cards to include in the PDF report'
+            : `${n} API${n !== 1 ? 's' : ''} selected`;
+  const btn = document.getElementById('generatePdfBtn');
+  btn.disabled = n === 0;
+}
+
+async function generatePDF() {
+  if (pdfSelectedIds.size === 0) { showToast('Select at least one API card', 'error'); return; }
+
+  const overlay = document.getElementById('pdfOverlay');
+  const fill    = document.getElementById('pdfProgressFill');
+  const label   = document.getElementById('pdfProgressLabel');
+
+  overlay.style.display = 'flex';
+  const steps = [
+    [10,  'Loading PDF engine...'],
+    [30,  'Collecting API data...'],
+    [55,  'Rendering pages...'],
+    [80,  'Applying styles...'],
+    [95,  'Finalising document...'],
+    [100, 'Done!'],
+  ];
+
+  const setProgress = (pct, msg) => {
+    fill.style.width  = pct + '%';
+    label.textContent = msg;
+  };
+
+  // Animate progress
+  for (const [pct, msg] of steps.slice(0, -1)) {
+    setProgress(pct, msg);
+    await sleep(420);
+  }
+
+  try {
+    const selectedAPIs = APIs.filter(a => pdfSelectedIds.has(a.id));
+    const user = getUser();
+    buildAndDownloadPDF(selectedAPIs, user);
+    setProgress(100, 'Done! Downloading...');
+    await sleep(600);
+    showToast(`PDF report generated with ${selectedAPIs.length} APIs`, 'success');
+    cancelPDFMode();
+  } catch (err) {
+    showToast('PDF generation failed: ' + err.message, 'error');
+  } finally {
+    await sleep(400);
+    overlay.style.display = 'none';
+    fill.style.width = '0%';
+  }
+}
+
+/* ── Pure-JS PDF builder (no external library needed) ── */
+function buildAndDownloadPDF(apis, user) {
+  const now      = new Date();
+  const dateStr  = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  const timeStr  = now.toTimeString().slice(0,8);
+  const userName = user.name || 'Operator';
+
+  // HTML → blob → open in new tab (browser prints as PDF)
+  const catColors = {
+    'IP Intelligence':'#00d4ff','Malware Analysis':'#ff2d55','Breach Detection':'#ff2d55',
+    'Threat Detection':'#8b5cf6','DNS Analysis':'#00ff88','WHOIS Lookup':'#8b5cf6',
+    'URL Scanning':'#ff6b2b','Email Intelligence':'#00ff88','Vulnerability':'#ff2d55','Geolocation':'#00d4ff'
+  };
+
+  const cardHTML = apis.map((api, i) => `
+    <div class="api-item">
+      <div class="api-item-header">
+        <div class="api-num">${String(api.id).padStart(2,'0')}</div>
+        <div class="api-title-block">
+          <div class="api-title">${api.name}</div>
+          <span class="api-cat" style="color:${catColors[api.category]||'#00d4ff'}">${api.category}</span>
+        </div>
+        <div class="api-url">${api.url}</div>
+      </div>
+      <div class="api-desc">${api.desc}</div>
+      <div class="api-meta">
+        <span><strong>Input:</strong> ${api.inputLabel}</span>
+        <span><strong>Tags:</strong> ${api.tags.join(', ')}</span>
+        <span><strong>Endpoint:</strong> ${api.endpoint}</span>
+      </div>
+    </div>
+    ${(i + 1) % 4 === 0 && i !== apis.length - 1 ? '<div class="page-break"></div>' : ''}
+  `).join('');
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CyberShield — API Intelligence Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;600&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #020c14; color: #e2f4ff;
+    font-family: 'Rajdhani', sans-serif; font-size: 13px;
+    line-height: 1.55; padding: 0;
+  }
+  /* Cover page */
+  .cover {
+    background: linear-gradient(135deg, #020c14 0%, #041a2e 100%);
+    border-bottom: 2px solid #00d4ff;
+    min-height: 220px; padding: 48px 56px 40px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .cover-label { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.3em; color:#3a6478; text-transform:uppercase; }
+  .cover-title { font-family:'Orbitron',monospace; font-size:32px; font-weight:900; color:#00d4ff; text-shadow:0 0 30px rgba(0,212,255,0.5); margin: 6px 0 4px; }
+  .cover-sub   { font-family:'Orbitron',monospace; font-size:14px; color:#7db8d4; }
+  .cover-meta  { font-family:'Share Tech Mono',monospace; font-size:10px; color:#3a6478; margin-top:16px; display:flex; gap:32px; }
+  .cover-meta span strong { color:#7db8d4; }
+  .cover-stats { display:flex; gap:24px; margin-top:20px; }
+  .cstat { border:1px solid rgba(0,212,255,0.2); padding:10px 18px; }
+  .cstat-num { font-family:'Orbitron',monospace; font-size:22px; font-weight:700; color:#00d4ff; }
+  .cstat-lbl { font-family:'Share Tech Mono',monospace; font-size:9px; color:#3a6478; text-transform:uppercase; letter-spacing:0.1em; }
+  /* Section header */
+  .section-header {
+    background: rgba(0,212,255,0.05); border-top: 1px solid rgba(0,212,255,0.2);
+    border-bottom: 1px solid rgba(0,212,255,0.2);
+    padding: 10px 56px; margin-bottom: 0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .section-header h2 { font-family:'Orbitron',monospace; font-size:9px; letter-spacing:0.25em; color:#3a6478; text-transform:uppercase; }
+  .section-header span { font-family:'Share Tech Mono',monospace; font-size:9px; color:#3a6478; }
+  /* API Items */
+  .api-list { padding: 24px 56px; display: flex; flex-direction: column; gap: 16px; }
+  .api-item { background: #061a2a; border: 1px solid rgba(0,212,255,0.15); padding: 14px 16px; }
+  .api-item-header { display:flex; align-items:flex-start; gap:12px; margin-bottom:8px; }
+  .api-num  { font-family:'Orbitron',monospace; font-size:18px; color:rgba(0,212,255,0.25); font-weight:900; flex-shrink:0; line-height:1; }
+  .api-title-block { flex:1; }
+  .api-title { font-family:'Orbitron',monospace; font-size:12px; color:#e2f4ff; font-weight:700; }
+  .api-cat   { font-family:'Share Tech Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.1em; }
+  .api-url   { font-family:'Share Tech Mono',monospace; font-size:9px; color:#3a6478; margin-left:auto; }
+  .api-desc  { color:#7db8d4; font-size:11px; margin-bottom:8px; line-height:1.6; }
+  .api-meta  { display:flex; gap:20px; font-family:'Share Tech Mono',monospace; font-size:9px; color:#3a6478; flex-wrap:wrap; }
+  .api-meta strong { color:#7db8d4; }
+  .page-break { page-break-after: always; height: 0; }
+  /* Footer */
+  .footer {
+    border-top: 1px solid rgba(0,212,255,0.1);
+    padding: 12px 56px;
+    display: flex; justify-content: space-between;
+    font-family:'Share Tech Mono',monospace; font-size:9px; color:#3a6478;
+  }
+  @media print {
+    body { background: #020c14 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page-break { page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+  <div class="cover">
+    <div class="cover-label">// Cyber Security Intelligence Report</div>
+    <div class="cover-title">CYBERSHIELD</div>
+    <div class="cover-sub">API Intelligence Dashboard — Security Tools Report</div>
+    <div class="cover-meta">
+      <span><strong>Generated:</strong> ${dateStr} at ${timeStr}</span>
+      <span><strong>Operator:</strong> ${userName}</span>
+      <span><strong>Classification:</strong> EDUCATIONAL</span>
+    </div>
+    <div class="cover-stats">
+      <div class="cstat"><div class="cstat-num">${apis.length}</div><div class="cstat-lbl">APIs Included</div></div>
+      <div class="cstat"><div class="cstat-num">${[...new Set(apis.map(a=>a.category))].length}</div><div class="cstat-lbl">Categories</div></div>
+      <div class="cstat"><div class="cstat-num">FREE</div><div class="cstat-lbl">All Tools</div></div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>Security API Catalog</h2>
+    <span>${apis.length} tool${apis.length!==1?'s':''} selected</span>
+  </div>
+
+  <div class="api-list">${cardHTML}</div>
+
+  <div class="footer">
+    <span>CyberShield Intelligence Dashboard — Group A eProject</span>
+    <span>Generated ${dateStr} • ${apis.length} APIs • EDUCATIONAL USE ONLY</span>
+  </div>
+
+  <script>window.onload = () => { window.print(); }<\/script>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const win  = window.open(url, '_blank');
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ════════════════════════════════════════════════════════════════════════════
+   MODAL / TEST
+════════════════════════════════════════════════════════════════════════════ */
+let currentAPI = null;
+
+function openTest(id) {
+  currentAPI = APIs.find(a => a.id === id);
+  if (!currentAPI) return;
+  document.getElementById('modalTitle').textContent = currentAPI.name.toUpperCase() + ' — TEST PANEL';
+  document.getElementById('modalSub').textContent   = currentAPI.category + ' • ' + currentAPI.url;
+  document.getElementById('inputLabel').textContent  = currentAPI.inputLabel;
+  document.getElementById('testInput').placeholder   = currentAPI.placeholder;
+  document.getElementById('queryHint').textContent   = '💡 ' + currentAPI.hint;
+  document.getElementById('testInput').value         = '';
+  document.getElementById('resultAreaWrap').innerHTML =
+    '<div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);padding:0.5rem 0">// Ready — enter a query and execute</div>';
+  document.getElementById('testModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('testInput').focus(), 120);
+  logActivity(id, 'view');
+}
+
+function closeModal() {
+  document.getElementById('testModal').style.display = 'none';
+  currentAPI = null;
+}
+
+function clearResult() {
+  document.getElementById('resultAreaWrap').innerHTML =
+    '<div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);padding:0.5rem 0">// Cleared</div>';
+}
+
+async function runTest() {
+  const input = document.getElementById('testInput').value.trim();
+  if (!input)      { showToast('Please enter a query value', 'error'); return; }
+  if (!currentAPI) return;
+
+  const btn  = document.getElementById('runBtn');
+  const wrap = document.getElementById('resultAreaWrap');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="cyber-spinner" style="width:14px;height:14px;border-width:2px;display:inline-block"></span> QUERYING...';
+
+  // Smooth skeleton loader
+  wrap.innerHTML = `
+    <div class="result-skeleton">
+      <div class="skeleton-line" style="width:60%"></div>
+      <div class="skeleton-line" style="width:80%"></div>
+      <div class="skeleton-line" style="width:45%"></div>
+      <div class="skeleton-line" style="width:70%"></div>
+      <div class="skeleton-line" style="width:55%"></div>
+    </div>`;
+
+  incActivityCount();
+  logActivity(currentAPI.id, 'test', input);
+
+  const token = getToken();
+  try {
+    const res  = await fetch(`${currentAPI.endpoint}?query=${encodeURIComponent(input)}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    // A revoked or expired session fails the backend's protect middleware → 401.
+    // Bounce to login instead of showing a confusing error.
+    if (res.status === 401) { handleUnauthorized(); return; }
+
+    const data = await res.json();
+
+    if (!data.success) {
+      wrap.innerHTML = `
+        <div class="result-error">
+          <i class="fa-solid fa-circle-xmark"></i>
+          <div><strong>Error</strong><br>${data.error || 'Unknown error occurred.'}</div>
+        </div>`;
+    } else {
+      wrap.innerHTML = buildResultHTML(currentAPI, data, input);
+    }
+    showToast('Query executed successfully', 'success');
+  } catch (err) {
+    wrap.innerHTML = `
+      <div class="result-error">
+        <i class="fa-solid fa-circle-xmark"></i>
+        <div><strong>Connection Error</strong><br>Could not reach the server. Make sure the backend is running on port 5000.</div>
+      </div>`;
+    showToast('Server connection failed', 'error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-play"></i> EXECUTE QUERY';
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   RESULT RENDERER — clean card-based output
+════════════════════════════════════════════════════════════════════════════ */
+function field(label, value, mono = false) {
+  return `<div class="result-field">
+    <div class="rf-label">${label}</div>
+    <div class="rf-value${mono?' mono':''}">${value ?? '—'}</div>
+  </div>`;
+}
+function pill(text, type='info') {
+  return `<span class="status-pill status-${type}">
+    <i class="fa-solid fa-${type==='safe'?'check-circle':type==='danger'?'circle-xmark':type==='warn'?'triangle-exclamation':'circle-info'}"></i>
+    ${text}
+  </span>`;
+}
+function scoreBar(score, max=100) {
+  const pct = Math.min((score / max) * 100, 100);
+  const color = pct >= 75 ? 'var(--accent-red)' : pct >= 40 ? 'var(--accent-orange)' : 'var(--accent-green)';
+  return `<div class="score-track"><div class="score-fill" style="width:${pct}%;background:${color}"></div></div>`;
+}
+function listItems(items, icon='chevron-right') {
+  if (!items?.length) return '<div class="result-list-item" style="color:var(--text-muted)">None found</div>';
+  return items.map(i => `<div class="result-list-item"><i class="fa-solid fa-${icon}"></i>${i}</div>`).join('');
+}
+function rawToggle(data) {
+  const uid = 'raw_' + Math.random().toString(36).slice(2,7);
+  return `<button class="raw-toggle" onclick="
+    const p=document.getElementById('${uid}');
+    p.classList.toggle('open');
+    this.textContent=p.classList.contains('open')?'Hide Raw JSON':'Show Raw JSON'
+  ">Show Raw JSON</button>
+  <div class="raw-panel" id="${uid}">${JSON.stringify(data, null, 2)}</div>`;
+}
+
+function buildResultHTML(api, data, query) {
+  let html = `<div style="margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem">
+    <span style="font-family:var(--font-display);font-size:0.62rem;letter-spacing:0.15em;color:var(--text-muted)">${data.api || api.name}</span>
+    <span style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted)">• ${new Date().toLocaleTimeString()}</span>
+  </div>`;
+
+  switch (api.id) {
+
+    /* ── 1. AbuseIPDB ── */
+    case 1: {
+      const d = data.data || {};
+      const s = d.abuseConfidenceScore ?? 0;
+      html += pill(s >= 75 ? 'HIGH RISK' : s >= 25 ? 'SUSPICIOUS' : 'CLEAN', s >= 50 ? 'danger' : s >= 25 ? 'warn' : 'safe');
+      html += `<div style="margin-bottom:0.75rem">${scoreBar(s)}</div>`;
+      html += `<div class="result-grid">
+        ${field('IP Address', d.ipAddress || query, true)}
+        ${field('Abuse Score', s + '%')}
+        ${field('Country', (d.countryCode || '—') + (d.countryName ? ' — ' + d.countryName : ''))}
+        ${field('ISP', d.isp || '—')}
+        ${field('Domain', d.domain || '—')}
+        ${field('Usage Type', d.usageType || '—')}
+        ${field('Total Reports', d.totalReports ?? 0)}
+        ${field('Last Reported', d.lastReportedAt ? new Date(d.lastReportedAt).toLocaleDateString() : 'Never')}
+        ${field('Whitelisted', d.isWhitelisted ? 'Yes' : 'No')}
+      </div>`;
+      break;
+    }
+
+    /* ── 2. VirusTotal ── */
+    case 2: {
+      const st = data.lastAnalysisStats || {};
+      const mal = st.malicious || 0;
+      const tot = Object.values(st).reduce((a,b)=>a+b,0);
+      html += pill(mal > 0 ? `${mal} Detections — UNSAFE` : 'Clean — No detections', mal > 0 ? 'danger' : 'safe');
+      html += `<div class="result-grid">
+        ${field('Domain', data.domain || query)}
+        ${field('Reputation', data.reputation ?? '—')}
+        ${field('Malicious', st.malicious || 0)}
+        ${field('Suspicious', st.suspicious || 0)}
+        ${field('Clean', st.harmless || 0)}
+        ${field('Undetected', st.undetected || 0)}
+        ${field('Total Engines', tot)}
+        ${field('Registrar', data.registrar || '—')}
+      </div>`;
+      if (data.categories && Object.keys(data.categories).length) {
+        html += `<div class="result-section">
+          <div class="result-sec-title"><i class="fa-solid fa-tags"></i>Categories</div>
+          <div class="result-list">${Object.entries(data.categories).slice(0,6).map(([k,v])=>`<div class="result-list-item"><i class="fa-solid fa-chevron-right"></i>${k}: <strong>${v}</strong></div>`).join('')}</div>
+        </div>`;
+      }
+      break;
+    }
+
+    /* ── 3. HIBP ── */
+    case 3: {
+      const pwned = data.status === 'PWNED';
+      html += pill(pwned ? `PWNED — ${data.breachCount} breach${data.breachCount!==1?'es':''}` : 'SAFE — No breaches found', pwned ? 'danger' : 'safe');
+      html += `<div class="result-grid">
+        ${field('Email', data.email || query, true)}
+        ${field('Status', data.status || '—')}
+        ${field('Breach Count', data.breachCount ?? 0)}
+        ${field('Paste Count', data.pasteCount ?? '—')}
+      </div>`;
+      if (data.breaches?.length) {
+        html += `<div class="result-section">
+          <div class="result-sec-title"><i class="fa-solid fa-database"></i>Breaches Found</div>
+          <div class="result-list">${data.breaches.slice(0,8).map(b=>`<div class="result-list-item"><i class="fa-solid fa-triangle-exclamation" style="color:var(--accent-red)"></i>${b.Name||b.name||b}</div>`).join('')}</div>
+        </div>`;
+      }
+      if (data.recentBreaches?.length) {
+        html += `<div class="result-section">
+          <div class="result-sec-title"><i class="fa-solid fa-clock-rotate-left"></i>Recent Breaches in Database</div>
+          <div class="result-list">${data.recentBreaches.slice(0,5).map(b=>`<div class="result-list-item"><i class="fa-solid fa-triangle-exclamation" style="color:var(--accent-orange)"></i>${b.name} (${b.breachDate}) — ${(b.pwnCount||0).toLocaleString()} accounts</div>`).join('')}</div>
+        </div>`;
+      }
+      if (data.note) html += `<div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-top:0.5rem">ℹ️ ${data.note}</div>`;
+      if (data.getKey) html += `<div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted);margin-top:0.3rem">🔑 ${data.getKey}</div>`;
+      break;
+    }
+
+    /* ── 4 & 16: IPinfo / IPAPI ── */
+    case 4: case 16: {
+      const d = data.data || {};
+      html += `<div class="result-grid">
+        ${field('IP', d.ip || query, true)}
+        ${field('Country', d.country_name || d.country || '—')}
+        ${field('Region', d.region || d.region_name || '—')}
+        ${field('City', d.city || '—')}
+        ${field('Timezone', d.timezone || '—')}
+        ${field('ISP / Org', d.org || d.isp || '—')}
+        ${field('Latitude', d.loc ? d.loc.split(',')[0] : (d.latitude || '—'))}
+        ${field('Longitude', d.loc ? d.loc.split(',')[1] : (d.longitude || '—'))}
+        ${field('Postal', d.postal || '—')}
+        ${field('ASN', d.asn || '—')}
+      </div>`;
+      break;
+    }
+
+    /* ── 5. Shodan ── */
+    case 5: {
+      html += `<div class="result-grid">
+        ${field('IP', data.ip || query, true)}
+        ${field('Organization', data.org || '—')}
+        ${field('ISP', data.isp || '—')}
+        ${field('Country', data.country || '—')}
+        ${field('City', data.city || '—')}
+        ${field('OS', data.os || 'Unknown')}
+        ${field('Last Updated', data.lastUpdate ? new Date(data.lastUpdate).toLocaleDateString() : '—')}
+        ${field('Open Ports', data.openPorts?.length ? data.openPorts.join(', ') : 'None')}
+      </div>`;
+      if (data.hostnames?.length) {
+        html += `<div class="result-section"><div class="result-sec-title"><i class="fa-solid fa-server"></i>Hostnames</div>
+          <div class="result-list">${listItems(data.hostnames.slice(0,5),'server')}</div></div>`;
+      }
+      if (data.vulns?.length) {
+        html += `<div class="result-section"><div class="result-sec-title" style="color:var(--accent-red)"><i class="fa-solid fa-bug"></i>Known Vulnerabilities</div>
+          <div class="result-list">${listItems(data.vulns.slice(0,5),'bug')}</div></div>`;
+      }
+      if (data.note) html += `<div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-top:0.5rem">ℹ️ ${data.note}</div>`;
+      break;
+    }
+
+    /* ── 6. SecurityTrails / HackerTarget ── */
+    case 6: {
+      html += pill('DNS Intelligence Retrieved', 'info');
+      html += `<div class="result-grid">${field('Domain', query)}${field('Source', data.api || '—')}</div>`;
+      if (data.dnsRecords) {
+        html += `<div class="result-section"><div class="result-sec-title"><i class="fa-solid fa-server"></i>DNS Records</div>
+          <div class="raw-panel open" style="max-height:180px">${data.dnsRecords}</div></div>`;
+      }
+      if (data.note) html += `<div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-top:0.5rem">ℹ️ ${data.note}</div>`;
+      break;
+    }
+
+    /* ── 7. WHOIS / RDAP ── */
+    case 7: {
+      html += `<div class="result-grid">
+        ${field('Domain', data.domain || query)}
+        ${field('Registrar', data.registrar || '—')}
+        ${field('Registered', data.registered ? new Date(data.registered).toLocaleDateString() : '—')}
+        ${field('Expires', data.expires ? new Date(data.expires).toLocaleDateString() : '—')}
+        ${field('Last Changed', data.lastChanged ? new Date(data.lastChanged).toLocaleDateString() : '—')}
+        ${field('Status', Array.isArray(data.status) ? data.status[0] : (data.status || '—'))}
+      </div>`;
+      if (data.nameservers?.length) {
+        html += `<div class="result-section"><div class="result-sec-title"><i class="fa-solid fa-server"></i>Nameservers</div>
+          <div class="result-list">${listItems(data.nameservers,'server')}</div></div>`;
+      }
+      if (data.note) html += `<div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-top:0.5rem">ℹ️ ${data.note}</div>`;
+      break;
+    }
+
+    /* ── 8. GreyNoise ── */
+    case 8: {
+      const d = data.data || {};
+      const cls = (d.classification||'').toLowerCase();
+      const type = cls==='malicious'?'danger':cls==='benign'?'safe':'warn';
+      html += pill((cls||'UNKNOWN').toUpperCase(), type);
+      html += `<div class="result-grid">
+        ${field('IP', d.ip || query, true)}
+        ${field('Classification', d.classification || '—')}
+        ${field('Background Noise', d.noise ? 'Yes — active scanner' : 'No')}
+        ${field('RIOT (known good)', d.riot ? 'Yes' : 'No')}
+        ${field('Name / Service', d.name || '—')}
+        ${field('Last Seen', d.last_seen || '—')}
+        ${field('Message', d.message || '—')}
+      </div>`;
+      break;
+    }
+
+    /* ── 9. URLScan ── */
+    case 9: {
+      if (data.scans?.length) {
+        // Search results (free mode)
+        html += pill(`Found ${data.totalResults} public scans`, 'info');
+        html += `<div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-bottom:0.75rem">ℹ️ ${data.note||''}</div>`;
+        html += `<div class="result-list" style="gap:0.5rem">${data.scans.slice(0,5).map(s=>`
+          <div class="result-list-item" style="flex-direction:column;align-items:flex-start;gap:0.3rem;padding:0.75rem">
+            <div style="color:var(--text-primary);font-size:0.8rem">${s.url || query}</div>
+            <div style="display:flex;gap:1rem;font-size:0.68rem;color:var(--text-muted)">
+              <span>IP: ${s.ip||'—'}</span>
+              <span>Country: ${s.country||'—'}</span>
+              <span>Server: ${s.server||'—'}</span>
+              <span>${s.date ? new Date(s.date).toLocaleDateString() : ''}</span>
+            </div>
+            ${s.resultLink ? `<a href="${s.resultLink}" target="_blank" style="color:var(--accent-cyan);font-size:0.7rem">${s.resultLink}</a>` : ''}
+          </div>`).join('')}</div>`;
+      } else {
+        // Submitted scan
+        html += pill('Scan Submitted', 'info');
+        html += `<div class="result-grid">${field('Scan ID', data.scanId, true)}${field('Status', 'Processing (~30s)')}</div>`;
+        html += `<div class="result-list">
+          <div class="result-list-item"><i class="fa-solid fa-arrow-up-right-from-square" style="color:var(--accent-cyan)"></i>
+            <a href="${data.resultUrl}" target="_blank" style="color:var(--accent-cyan)">${data.resultUrl}</a></div>
+          ${data.screenshotUrl ? `<div class="result-list-item"><i class="fa-solid fa-image" style="color:var(--accent-cyan)"></i>
+            <a href="${data.screenshotUrl}" target="_blank" style="color:var(--accent-cyan)">Screenshot (available after ~30s)</a></div>` : ''}
+        </div>`;
+      }
+      break;
+    }
+
+    /* ── 10. Hunter / HackerTarget ── */
+    case 10: {
+      html += pill('Email Intelligence Retrieved', 'info');
+      html += `<div class="result-grid">${field('Domain', query)}${field('Source', data.api||'—')}</div>`;
+      if (data.reverseDNS) {
+        html += `<div class="result-section"><div class="result-sec-title"><i class="fa-solid fa-network-wired"></i>Reverse DNS</div>
+          <div class="raw-panel open" style="max-height:160px">${data.reverseDNS}</div></div>`;
+      }
+      if (data.note) html += `<div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-top:0.5rem">ℹ️ ${data.note}</div>`;
+      break;
+    }
+
+    /* ── 11. BuiltWith ── */
+    case 11: {
+      html += `<div class="result-grid">${field('Domain', data.domain||query)}</div>`;
+      if (data.detectedTech?.length) {
+        html += `<div class="result-section"><div class="result-sec-title"><i class="fa-solid fa-code"></i>Detected Technologies</div>
+          <div class="result-list">${data.detectedTech.map(t=>`<div class="result-list-item"><i class="fa-solid fa-check" style="color:var(--accent-green)"></i>${t}</div>`).join('')}</div></div>`;
+      }
+      if (data.httpHeaders) {
+        html += `<div class="result-section"><div class="result-sec-title"><i class="fa-solid fa-file-code"></i>HTTP Headers</div>
+          <div class="raw-panel open" style="max-height:160px">${data.httpHeaders}</div></div>`;
+      }
+      if (data.note) html += `<div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-top:0.5rem">ℹ️ ${data.note}</div>`;
+      break;
+    }
+
+    /* ── 12. Censys / InternetDB ── */
+    case 12: {
+      html += `<div class="result-grid">
+        ${field('IP', data.ip || query, true)}
+        ${field('Open Ports', data.openPorts?.join(', ') || 'None')}
+        ${field('Tags', data.tags?.join(', ') || '—')}
+      </div>`;
+      if (data.hostnames?.length) {
+        html += `<div class="result-section"><div class="result-sec-title"><i class="fa-solid fa-server"></i>Hostnames</div>
+          <div class="result-list">${listItems(data.hostnames.slice(0,5),'server')}</div></div>`;
+      }
+      if (data.vulns?.length) {
+        html += `<div class="result-section"><div class="result-sec-title" style="color:var(--accent-red)"><i class="fa-solid fa-bug"></i>CVEs</div>
+          <div class="result-list">${listItems(data.vulns.slice(0,6),'bug')}</div></div>`;
+      }
+      if (data.note) html += `<div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-top:0.5rem">ℹ️ ${data.note}</div>`;
+      break;
+    }
+
+    /* ── 13. OpenPhish ── */
+    case 13: {
+      html += pill(data.isPhishing ? 'PHISHING DETECTED' : 'NOT IN DATABASE', data.isPhishing ? 'danger' : 'safe');
+      html += `<div class="result-grid">
+        ${field('Query', data.query||query)}
+        ${field('Status', data.status||'—')}
+        ${field('Matches Found', data.matchCount||0)}
+        ${field('Feed Size', (data.feedSize||0).toLocaleString() + ' URLs')}
+      </div>`;
+      if (data.matches?.length) {
+        html += `<div class="result-section"><div class="result-sec-title" style="color:var(--accent-red)"><i class="fa-solid fa-fish"></i>Matched URLs</div>
+          <div class="result-list">${listItems(data.matches,'fish')}</div></div>`;
+      }
+      break;
+    }
+
+    /* ── 14. OTX ── */
+    case 14: {
+      const d = data.data || {};
+      html += `<div class="result-grid">
+        ${field('Indicator', query)}
+        ${field('Type', data.indicatorType||'—')}
+        ${field('Pulse Count', d.pulse_info?.count ?? '—')}
+        ${field('Reputation', d.reputation ?? '—')}
+      </div>`;
+      break;
+    }
+
+    /* ── 15 & 20: NVD / CVE Details ── */
+    case 15: case 20: {
+      const vulns = data.vulnerabilities || [];
+      html += `<div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);margin-bottom:0.75rem">Found <strong style="color:var(--text-primary)">${data.total||vulns.length}</strong> result(s)</div>`;
+      if (!vulns.length) { html += `<div style="color:var(--text-muted);font-size:0.85rem">No vulnerabilities found for this query.</div>`; break; }
+      html += vulns.map(v => {
+        const score = parseFloat(v.cvssScore) || 0;
+        const sev   = (v.severity||'').toLowerCase();
+        const color = sev==='critical'?'var(--accent-red)':sev==='high'?'var(--accent-red)':sev==='medium'?'var(--accent-orange)':'var(--accent-green)';
+        return `<div class="result-section">
+          <div class="result-sec-title">
+            <i class="fa-solid fa-bug" style="color:${color}"></i>${v.id}
+            <span style="margin-left:auto;color:${color};font-weight:600">CVSS ${v.cvssScore} — ${v.severity||'N/A'}</span>
+          </div>
+          ${scoreBar(score, 10)}
+          <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.75rem;line-height:1.55">${v.description||'No description available'}</div>
+          <div class="result-grid" style="grid-template-columns:repeat(3,1fr)">
+            ${field('Published', v.published ? new Date(v.published).toLocaleDateString() : '—')}
+            ${field('Modified', v.lastModified ? new Date(v.lastModified).toLocaleDateString() : '—')}
+            ${field('Severity', v.severity||'N/A')}
+          </div>
+          ${v.references?.length ? `<div class="result-list" style="margin-top:0.5rem">${v.references.map(r=>`<div class="result-list-item"><i class="fa-solid fa-link" style="color:var(--accent-cyan)"></i><a href="${r}" target="_blank" style="color:var(--accent-cyan)">${r}</a></div>`).join('')}</div>` : ''}
+        </div>`;
+      }).join('');
+      break;
+    }
+
+    /* ── 17. EmailRep ── */
+    case 17: {
+      const d = data.data || {};
+      const rep = d.reputation || 'unknown';
+      const rtype = rep==='high'?'safe':rep==='low'?'danger':'warn';
+      html += pill((rep||'unknown').toUpperCase() + ' Reputation', rtype);
+      html += `<div class="result-grid">
+        ${field('Email', d.email||query, true)}
+        ${field('Reputation', d.reputation||'—')}
+        ${field('Suspicious', d.suspicious ? 'Yes' : 'No')}
+        ${field('Spam', d.details?.spam ? 'Yes' : 'No')}
+        ${field('Blacklisted', d.details?.blacklisted ? 'Yes' : 'No')}
+        ${field('Disposable', d.details?.disposable_used ? 'Yes' : 'No')}
+        ${field('Free Provider', d.details?.free_provider ? 'Yes' : 'No')}
+        ${field('References', d.references||'—')}
+      </div>`;
+      break;
+    }
+
+    /* ── 18. DNS Lookup ── */
+    case 18: {
+      const recs = data.records || {};
+      html += `<div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-secondary);margin-bottom:0.75rem">
+        DNS Records for <strong style="color:var(--accent-cyan)">${data.domain||query}</strong>
+      </div>`;
+      Object.entries(recs).forEach(([type, info]) => {
+        if (!info.records?.length) return;
+        html += `<div class="result-section">
+          <div class="result-sec-title">
+            <span class="dns-type-tag">${type}</span>
+            Records
+            <span style="margin-left:auto;color:var(--accent-green);font-size:0.65rem">${info.status}</span>
+          </div>
+          <div class="result-list">${info.records.map(r=>`
+            <div class="result-list-item">
+              <i class="fa-solid fa-chevron-right"></i>
+              <span class="mono" style="flex:1">${r.data}</span>
+              <span style="color:var(--text-muted);font-size:0.68rem;flex-shrink:0">TTL ${r.ttl}s</span>
+            </div>`).join('')}
+          </div>
+        </div>`;
+      });
+      break;
+    }
+
+    /* ── 19. Safe Browsing ── */
+    case 19: {
+      html += pill(data.isSafe ? 'SAFE' : 'UNSAFE', data.isSafe ? 'safe' : 'danger');
+      html += `<div class="result-grid">
+        ${field('URL', data.url||query, true)}
+        ${field('Status', data.status||'—')}
+        ${field('Threats', data.threatCount||0)}
+        ${field('Source', data.api||'—')}
+      </div>`;
+      if (data.threats?.length) {
+        html += `<div class="result-section"><div class="result-sec-title" style="color:var(--accent-red)"><i class="fa-solid fa-triangle-exclamation"></i>Threats</div>
+          <div class="result-list">${data.threats.map(t=>`<div class="result-list-item"><i class="fa-solid fa-bug" style="color:var(--accent-red)"></i>${t.threatType} — ${t.platformType}</div>`).join('')}</div></div>`;
+      }
+      if (data.note) html += `<div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-top:0.5rem">ℹ️ ${data.note}</div>`;
+      break;
+    }
+
+    default:
+      html += `<div class="result-section"><div class="result-sec-title">Raw Response</div></div>`;
+  }
+
+  html += rawToggle(data);
+  return html;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════════════════════════════════ */
+function showToast(msg, type='info') {
+  const c = document.getElementById('toastContainer');
+  const icons = { success:'fa-check-circle', error:'fa-circle-xmark', info:'fa-circle-info', warning:'fa-triangle-exclamation' };
+  const t = document.createElement('div');
+  t.className = `cyber-toast ${type}`;
+  t.innerHTML = `<i class="fa-solid ${icons[type]||icons.info}"></i><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.animation = 'slideOut 0.3s ease forwards'; setTimeout(() => t.remove(), 300); }, 3200);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ACTIVITY LOG
+════════════════════════════════════════════════════════════════════════════ */
+async function logActivity(toolId, action, query='') {
+  const log = JSON.parse(localStorage.getItem('cs_activity') || '[]');
+  log.push({ toolId, action, query, timestamp: new Date().toISOString() });
+  localStorage.setItem('cs_activity', JSON.stringify(log.slice(-100)));
+  const token = getToken();
+  if (!token) return;
+  try {
+    await fetch('/api/activity/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ tool_id: toolId, action_type: action, query_input: query })
+    });
+  } catch (_) {}
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   AUTH & CLOCK
+════════════════════════════════════════════════════════════════════════════ */
+
+// Shared: clear local auth state and bounce to login.
+function redirectToLogin() {
+  clearAuth();
+  window.location.href = 'login.html';
+}
+
+// Called when any authenticated request returns 401 (revoked / expired session).
+function handleUnauthorized() {
+  showToast('Session ended. Please log in again.', 'error');
+  setTimeout(redirectToLogin, 600);
+}
+
+// Logout THIS session — tell the backend to flip this session's row to inactive,
+// then clear local state. The Authorization header lets the backend identify
+// which session to destroy. .finally() ensures we always clear + redirect even
+// if the request fails, so the user is never stuck on the page.
+function logout() {
+  const token = getToken();
+  fetch('/api/auth/logout', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+  })
+    .catch(err => console.error('Logout request failed:', err))
+    .finally(redirectToLogin);
+}
+
+function updateClock() {
+  document.getElementById('currentTime').textContent =
+    new Date().toISOString().replace('T',' ').substring(0,19) + ' UTC';
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   SESSION VALIDATION ON LOAD
+   The token string existing isn't proof the session is still alive — it may have
+   been destroyed server-side (logout-all from another device) or expired. Hit a
+   protected endpoint once on load; if it 401s, bounce to login immediately
+   instead of rendering a dashboard whose API calls will all fail.
+════════════════════════════════════════════════════════════════════════════ */
+async function validateSession() {
+  const token = getToken();
+  try {
+    const res = await fetch('/api/auth/profile', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.status === 401) { redirectToLogin(); return; }
+    // Refresh the cached user from the server's source of truth (e.g. name changed
+    // on another device) so the navbar display stays accurate.
+    const data = await res.json().catch(() => null);
+    if (data && data.success && data.user) {
+      const merged = { ...getUser(), ...data.user };
+      sessionStorage.setItem('user', JSON.stringify(merged));
+      const ud = document.getElementById('userDisplay');
+      if (ud && merged.name) ud.textContent = merged.name;
+    }
+  } catch (_) {
+    // Network error — leave the page up; individual API calls will surface their
+    // own connection errors. Don't redirect on a transient network blip.
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════════════════════════ */
+// Synchronous guard: no token at all → straight to login.
+if (!getToken()) window.location.href = 'login.html';
+
+const user = getUser();
+if (user.name) document.getElementById('userDisplay').textContent = user.name;
+
+// Init counters (these stay in localStorage — per-device, not auth)
+document.getElementById('bookmarkCount').textContent = getBookmarks().length;
+document.getElementById('activityCount').textContent = getActivityCount();
+
+// Render cards
+renderAPIs(APIs);
+
+// Clock
+updateClock();
+setInterval(updateClock, 1000);
+
+// Validate the session against the backend (async, runs after first paint)
+validateSession();
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && document.getElementById('testModal').style.display !== 'none') {
+    if (document.activeElement === document.getElementById('testInput')) runTest();
+  }
+});
+
+// Modal backdrop close
+document.getElementById('testModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+
+ 
+  /* ── State ── */
+  let csOpen     = false;
+  let csLoading  = false;
+  const csHistory = []; // { role, content }
+ 
+  const SUGGESTIONS = [
+    'What is this project about?',
+    'What APIs are available?',
+    'What will students learn?',
+    'What is the problem statement?',
+  ];
+ 
+  /* ── Toggle open/close ── */
+  window.csChatToggle = function() {
+    csOpen = !csOpen;
+    const panel  = document.getElementById('cs-chat-panel');
+    const avatar = document.getElementById('cs-chat-avatar');
+    const dot    = document.getElementById('cs-notif-dot');
+ 
+    panel.classList.toggle('open', csOpen);
+    avatar.classList.toggle('open', csOpen);
+ 
+    if (csOpen) {
+      dot.style.display = 'none';
+      // Boot message if first open
+      if (csHistory.length === 0) {
+        csAddMessage('bot',
+          'SYSTEM ONLINE // Hello, operator. I\'m the CyberShield AI assistant. Ask me anything about this project — APIs, features, tech stack, or how it works.'
+        );
+        csRenderSuggestions();
+      }
+      setTimeout(() => document.getElementById('cs-input').focus(), 200);
+    }
+  };
+ 
+  /* ── Render suggestion chips ── */
+  function csRenderSuggestions() {
+    const box = document.getElementById('cs-suggestions');
+    box.innerHTML = `<div class="cs-suggestion-label">// Quick questions</div>` +
+      SUGGESTIONS.map(q =>
+        `<button class="cs-suggestion" onclick="csAsk(${JSON.stringify(q)})">${q}</button>`
+      ).join('');
+  }
+ 
+  /* ── Ask via suggestion chip ── */
+  window.csAsk = function(question) {
+    document.getElementById('cs-input').value = question;
+    csSend();
+  };
+ 
+  /* ── Send message ── */
+  window.csSend = async function() {
+    const input = document.getElementById('cs-input');
+    const question = input.value.trim();
+    if (!question || csLoading) return;
+ 
+    // Clear suggestions on first real message
+    document.getElementById('cs-suggestions').innerHTML = '';
+ 
+    csAddMessage('user', question);
+    csHistory.push({ role: 'user', content: question });
+    input.value = '';
+    input.disabled = true;
+    document.getElementById('cs-send-btn').disabled = true;
+    csLoading = true;
+ 
+    // Show typing indicator
+    const typingId = csShowTyping();
+ 
+// Pause a random amount so it looks like it's thinking
+    await sleep(900 + Math.random() * 1200);   // 0.9s – 2.1s
+
+    try {
+      const token = getToken();
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ question })
+      });
+ 
+const data = await res.json();
+      csRemoveTyping(typingId);
+ 
+      if (data.success && data.answer) {
+        await csAddTypedMessage(data.answer);
+        csHistory.push({ role: 'assistant', content: data.answer });
+      } else {
+        await csAddTypedMessage(data.message || 'No answer found. Try rephrasing your question.', true);
+      }
+    } catch (err) {
+      csRemoveTyping(typingId);
+      await csAddTypedMessage('Connection error. Make sure the backend server is running on port 5000.', true);
+    }
+ 
+    input.disabled = false;
+    document.getElementById('cs-send-btn').disabled = false;
+    input.focus();
+    csLoading = false;
+  };
+ 
+  /* ── Add a message bubble ── */
+  function csAddMessage(role, text, isError = false) {
+    const msgs = document.getElementById('cs-messages');
+ 
+    const isUser = role === 'user';
+    const icon = isUser
+      ? '<i class="fa-solid fa-user"></i>'
+      : '<i class="fa-solid fa-shield-halved"></i>';
+ 
+    const errorStyle = isError
+      ? 'border-color:rgba(255,45,85,0.35);background:rgba(255,45,85,0.06);color:var(--accent-red,#ff2d55);'
+      : '';
+ 
+    const div = document.createElement('div');
+    div.className = `cs-msg ${isUser ? 'user' : 'bot'}`;
+    div.innerHTML = `
+      <div class="cs-msg-avatar">${icon}</div>
+      <div class="cs-bubble" style="${errorStyle}">${csEscape(text)}</div>
+    `;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+ 
+ /* ── Type out a bot message gradually ── */
+function csAddTypedMessage(text, isError = false, speed = 18) {
+  return new Promise(resolve => {
+    const msgs = document.getElementById('cs-messages');
+    const errorStyle = isError
+      ? 'border-color:rgba(255,45,85,0.35);background:rgba(255,45,85,0.06);color:var(--accent-red,#ff2d55);'
+      : '';
+
+    const div = document.createElement('div');
+    div.className = 'cs-msg bot';
+    div.innerHTML = `
+      <div class="cs-msg-avatar"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="cs-bubble" style="${errorStyle}"></div>
+    `;
+    msgs.appendChild(div);
+    const bubble = div.querySelector('.cs-bubble');
+
+    const chars = [...text];   // spread handles emoji/unicode correctly
+    let i = 0;
+    const tick = () => {
+      i++;
+      bubble.textContent = chars.slice(0, i).join('');  // textContent = auto-escaped, no XSS
+      msgs.scrollTop = msgs.scrollHeight;
+      if (i < chars.length) setTimeout(tick, speed);
+      else resolve();
+    };
+    tick();
+  });
+}
+
+  /* ── Typing indicator ── */
+  function csShowTyping() {
+    const msgs = document.getElementById('cs-messages');
+    const id = 'cs-typing-' + Date.now();
+    const div = document.createElement('div');
+    div.className = 'cs-msg bot';
+    div.id = id;
+    div.innerHTML = `
+      <div class="cs-msg-avatar"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="cs-typing"><span></span><span></span><span></span></div>
+    `;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    return id;
+  }
+ 
+  function csRemoveTyping(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  }
+ 
+  /* ── Escape HTML ── */
+  function csEscape(str) {
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+ 
+  /* ── Close on outside click ── */
+  document.addEventListener('click', function(e) {
+    if (!csOpen) return;
+    const panel  = document.getElementById('cs-chat-panel');
+    const avatar = document.getElementById('cs-chat-avatar');
+    if (!panel.contains(e.target) && !avatar.contains(e.target)) {
+      csChatToggle();
+    }
+  });
+ 
+  /* ── ESC to close ── */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && csOpen) csChatToggle();
+  });
+ 
+</script>
+</body>
+</html>

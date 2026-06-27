@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberShield — Register</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .strength-bar-wrap { margin-top: 0.5rem; }
+    .strength-bars {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 0.3rem;
+    }
+    .str-bar {
+      flex: 1; height: 3px;
+      background: rgba(0,212,255,0.1);
+      transition: background 0.3s;
+    }
+    .str-bar.weak { background: var(--accent-red); }
+    .str-bar.fair { background: var(--accent-orange); }
+    .str-bar.strong { background: var(--accent-green); }
+    .str-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+    .auth-visual-right {
+      background: linear-gradient(135deg, #020c14 0%, #041220 100%);
+      flex:1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .steps-list {
+      list-style: none;
+      width: 100%;
+      max-width: 340px;
+      margin-top: 2rem;
+    }
+    .steps-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 0.9rem 0;
+      border-bottom: 1px solid rgba(0,212,255,0.08);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    .step-num {
+      width: 28px; height: 28px;
+      border: 1px solid var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      color: var(--accent-cyan);
+      flex-shrink: 0;
+    }
+    .step-num.done {
+      background: var(--accent-cyan);
+      color: var(--bg-primary);
+    }
+    .floating-icons {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .float-icon {
+      position: absolute;
+      font-size: 1.2rem;
+      color: rgba(0,212,255,0.08);
+      animation: floatUp var(--d, 8s) linear infinite var(--delay,0s);
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(100vh) rotate(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+    }
+    .pass-wrapper { position: relative; }
+    .show-pass {
+      position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem;
+      transition: color 0.3s;
+    }
+    .show-pass:hover { color: var(--accent-cyan); }
+    .terms-check {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+    .terms-check input { accent-color: var(--accent-cyan); margin-top: 2px; flex-shrink: 0; }
+    @media (max-width: 900px) {
+      .auth-visual-right { display: none; }
+      .auth-form-side { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-wrapper">
+  <!-- Form Side -->
+  <div class="auth-form-side" style="width:500px">
+    <a href="index.html" class="nav-brand" style="margin-bottom:2rem">
+      <div class="brand-icon"><i class="fa-solid fa-lock"></i></div>
+      CYBERSHIELD
+    </a>
+
+    <div style="margin-bottom:2rem">
+      <div style="font-family:var(--font-display);font-size:1.2rem;color:var(--text-primary);margin-bottom:0.4rem">CREATE OPERATOR PROFILE</div>
+      <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted)">Register to access the threat intelligence platform</div>
+    </div>
+
+    <div id="alertBox" class="cyber-alert alert-error" style="display:none">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span id="alertMsg">Error message</span>
+    </div>
+
+    <div class="input-group-cyber fade-in">
+      <label class="input-label"><i class="fa-solid fa-user" style="margin-right:0.4rem"></i>Full Name</label>
+      <input type="text" class="cyber-input" id="name" placeholder="John Doe" autocomplete="name">
+      <div class="input-bar"></div>
+    </div>
+
+    <div class="input-group-cyber fade-in fade-in-delay-1">
+      <label class="input-label"><i class="fa-solid fa-at" style="margin-right:0.4rem"></i>Email Address</label>
+      <input type="email" class="cyber-input" id="email" placeholder="operator@cybershield.io" autocomplete="email">
+      <div class="input-bar"></div>
+    </div>
+
+    <div class="input-group-cyber fade-in fade-in-delay-2">
+      <label class="input-label"><i class="fa-solid fa-key" style="margin-right:0.4rem"></i>Password</label>
+      <div class="pass-wrapper">
+        <input type="password" class="cyber-input" id="password" placeholder="••••••••••••" oninput="checkStrength(this.value)">
+        <button class="show-pass" onclick="togglePass('password',this)" type="button">
+          <i class="fa-regular fa-eye"></i>
+        </button>
+      </div>
+      <div class="strength-bar-wrap">
+        <div class="strength-bars">
+          <div class="str-bar" id="sb1"></div>
+          <div class="str-bar" id="sb2"></div>
+          <div class="str-bar" id="sb3"></div>
+          <div class="str-bar" id="sb4"></div>
+        </div>
+        <div class="str-label" id="strLabel">Enter a password</div>
+      </div>
+      <div class="input-bar"></div>
+    </div>
+
+    <div class="input-group-cyber fade-in fade-in-delay-3">
+      <label class="input-label"><i class="fa-solid fa-shield-check" style="margin-right:0.4rem"></i>Confirm Password</label>
+      <div class="pass-wrapper">
+        <input type="password" class="cyber-input" id="confirmPassword" placeholder="••••••••••••">
+        <button class="show-pass" onclick="togglePass('confirmPassword',this)" type="button">
+          <i class="fa-regular fa-eye"></i>
+        </button>
+      </div>
+      <div class="input-bar"></div>
+    </div>
+
+    <div class="terms-check fade-in fade-in-delay-4">
+      <input type="checkbox" id="terms">
+      <label for="terms">I agree to the <a href="#" style="color:var(--accent-cyan)">Terms of Service</a> and acknowledge that all security tools are for educational purposes only.</label>
+    </div>
+
+    <button class="btn-cyber btn-cyber-green btn-cyber-full fade-in fade-in-delay-4" onclick="handleRegister()" id="regBtn">
+      <i class="fa-solid fa-user-plus"></i> CREATE PROFILE
+    </button>
+
+    <div style="text-align:center;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-top:1.5rem">
+      Already an operator? <a href="login.html" style="color:var(--accent-cyan)">Sign in here</a>
+    </div>
+  </div>
+
+  <!-- Visual Side -->
+  <div class="auth-visual-right">
+    <div class="floating-icons">
+      <i class="fa-solid fa-shield float-icon" style="left:10%;--d:10s;--delay:0s"></i>
+      <i class="fa-solid fa-lock float-icon" style="left:30%;--d:8s;--delay:2s"></i>
+      <i class="fa-solid fa-bug float-icon" style="left:60%;--d:12s;--delay:1s"></i>
+      <i class="fa-solid fa-eye float-icon" style="left:80%;--d:9s;--delay:3s"></i>
+      <i class="fa-solid fa-server float-icon" style="left:45%;--d:11s;--delay:0.5s"></i>
+      <i class="fa-solid fa-network-wired float-icon" style="left:70%;--d:7s;--delay:4s"></i>
+    </div>
+
+    <div style="position:relative;z-index:1;text-align:center;max-width:380px">
+      <div style="font-family:var(--font-display);font-size:0.65rem;letter-spacing:0.3em;color:var(--text-muted);margin-bottom:1rem">// OPERATOR ONBOARDING</div>
+      <div style="font-family:var(--font-display);font-size:2rem;color:var(--accent-green);text-shadow:var(--shadow-green);line-height:1.2;margin-bottom:0.5rem">JOIN THE<br>CYBER GRID</div>
+      <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);margin-bottom:2.5rem">Access 20+ intelligence APIs and security tools</div>
+
+      <ul class="steps-list">
+        <li>
+          <div class="step-num"><i class="fa-solid fa-check" style="font-size:0.7rem"></i></div>
+          <div><strong style="color:var(--text-primary)">Secure Registration</strong><br>
+          <span style="font-size:0.8rem">bcrypt encrypted passwords + JWT auth</span></div>
+        </li>
+        <li>
+          <div class="step-num">02</div>
+          <div><strong style="color:var(--text-primary)">Access 20 APIs</strong><br>
+          <span style="font-size:0.8rem">IP Intel, Threat Detection, Breach Scanning</span></div>
+        </li>
+        <li>
+          <div class="step-num">03</div>
+          <div><strong style="color:var(--text-primary)">Track Activities</strong><br>
+          <span style="font-size:0.8rem">Full audit log stored in MongoDB</span></div>
+        </li>
+        <li>
+          <div class="step-num">04</div>
+          <div><strong style="color:var(--text-primary)">Bookmark & Research</strong><br>
+          <span style="font-size:0.8rem">Save favorite tools & build your toolkit</span></div>
+        </li>
+      </ul>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-top:2rem">
+        <div class="stat-box">
+          <div class="stat-value">20</div>
+          <div class="stat-label">Free APIs</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">10</div>
+          <div class="stat-label">Categories</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">Free</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  function togglePass(id, btn) {
+    const inp = document.getElementById(id);
+    const icon = btn.querySelector('i');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    icon.className = inp.type === 'password' ? 'fa-regular fa-eye' : 'fa-regular fa-eye-slash';
+  }
+
+  function checkStrength(val) {
+    const bars = [document.getElementById('sb1'),document.getElementById('sb2'),document.getElementById('sb3'),document.getElementById('sb4')];
+    const lbl = document.getElementById('strLabel');
+    bars.forEach(b => b.className = 'str-bar');
+    if (!val) { lbl.textContent = 'Enter a password'; return; }
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const labels = ['','WEAK','FAIR','STRONG','VERY STRONG'];
+    const classes = ['','weak','fair','strong','strong'];
+    for (let i = 0; i < score; i++) bars[i].classList.add(classes[score]);
+    lbl.textContent = labels[score] || '';
+    lbl.style.color = score <= 1 ? 'var(--accent-red)' : score === 2 ? 'var(--accent-orange)' : 'var(--accent-green)';
+  }
+
+  function showToast(msg, type='info') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    const icons = { success:'fa-check-circle', error:'fa-circle-xmark', info:'fa-circle-info' };
+    t.className = `cyber-toast ${type}`;
+    t.innerHTML = `<i class="fa-solid ${icons[type]||icons.info}"></i><span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(()=>{ t.style.animation='slideOut 0.3s ease forwards'; setTimeout(()=>t.remove(),300); }, 3500);
+  }
+
+  async function handleRegister() {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    const terms = document.getElementById('terms').checked;
+    const btn = document.getElementById('regBtn');
+
+    if (!name || !email || !password || !confirm) {
+      document.getElementById('alertBox').style.display = 'flex';
+      document.getElementById('alertMsg').textContent = 'All fields are required.';
+      return;
+    }
+    if (password !== confirm) {
+      document.getElementById('alertBox').style.display = 'flex';
+      document.getElementById('alertMsg').textContent = 'Passwords do not match.';
+      return;
+    }
+    if (!terms) {
+      showToast('Please accept the terms of service', 'error');
+      return;
+    }
+
+    btn.innerHTML = '<span class="cyber-spinner" style="width:16px;height:16px;border-width:2px"></span> CREATING...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('Profile created! Redirecting to login...', 'success');
+        setTimeout(()=> window.location.href='login.html', 1500);
+      } else {
+        document.getElementById('alertBox').style.display = 'flex';
+        document.getElementById('alertMsg').textContent = data.message || 'Registration failed';
+        showToast(data.message || 'Registration failed', 'error');
+        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> CREATE PROFILE';
+        btn.disabled = false;
+      }
+    } catch (err) {
+      showToast('Server connection failed', 'error');
+      btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> CREATE PROFILE';
+      btn.disabled = false;
+    }
+  }
+
+  if (localStorage.getItem('token')) window.location.href='dashboard.html';
+</script>
+</body>
+</html>

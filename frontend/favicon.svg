@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#00e5ff"/>
+      <stop offset="1" stop-color="#00a3cc"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.4" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- dark rounded tile -->
+  <rect width="64" height="64" rx="13" fill="#020c14"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="11.5" fill="none" stroke="#0a2230" stroke-width="1"/>
+
+  <g filter="url(#glow)">
+    <!-- full shield outline -->
+    <path d="M32 8 L52 15 L52 31 C52 44 43 52 32 57 C21 52 12 44 12 31 L12 15 Z"
+          fill="none" stroke="url(#shieldGrad)" stroke-width="3" stroke-linejoin="round"/>
+    <!-- left half filled (the "halved" look) -->
+    <path d="M32 8 L12 15 L12 31 C12 44 21 52 32 57 Z" fill="url(#shieldGrad)"/>
+  </g>
+</svg>

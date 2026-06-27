@@ -1,0 +1,23 @@
+{
+  "name": "cybershield-backend",
+  "version": "1.0.0",
+  "description": "CyberShield Security Intelligence Dashboard Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.6",
+    "dotenv": "^16.3.1",
+    "express": "^4.22.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.0",
+    "natural": "^8.1.1",
+    "nodemon": "^3.0.2",
+    "onnxruntime-node": "^1.26.0",
+    "ua-parser-js": "^2.0.10"
+  }
+}

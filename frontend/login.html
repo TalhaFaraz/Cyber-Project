@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberShield — Login</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .auth-wrapper { position: relative; z-index: 1; }
+    .visual-canvas {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+    .hex-bg {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 4px;
+      padding: 2rem;
+      opacity: 0.15;
+      transform: rotate(15deg) scale(1.3);
+    }
+    .hex-cell {
+      aspect-ratio: 1;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      background: var(--accent-cyan);
+      animation: hexPop var(--d,3s) ease-in-out infinite var(--delay,0s);
+    }
+    @keyframes hexPop { 0%,100%{opacity:0.2} 50%{opacity:1} }
+    .threat-ring {
+      position: absolute;
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 50%;
+      animation: ringPulse 4s ease-in-out infinite;
+    }
+    @keyframes ringPulse { 0%,100%{transform:scale(1);opacity:0.5} 50%{transform:scale(1.1);opacity:0.2} }
+    .globe-vis {
+      width: 280px; height: 280px;
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 50%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 2rem auto;
+    }
+    .globe-vis::before {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      border: 1px dashed rgba(0,212,255,0.15);
+      border-radius: 50%;
+      animation: spin 20s linear infinite;
+    }
+    .globe-vis::after {
+      content: '';
+      position: absolute;
+      inset: -40px;
+      border: 1px dashed rgba(0,255,136,0.1);
+      border-radius: 50%;
+      animation: spin 30s linear infinite reverse;
+    }
+    .globe-inner {
+      font-size: 5rem;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 40px rgba(0,212,255,0.8);
+      animation: iconPulse 2s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+    }
+    @keyframes iconPulse { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.5)} }
+    .scan-line {
+      position: absolute;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+      animation: scanMove 3s linear infinite;
+      border-radius: 50%;
+    }
+    @keyframes scanMove {
+      0% { top: 0; opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
+    }
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      width: 100%;
+    }
+    .visual-stat {
+      text-align: center;
+    }
+    .visual-stat .num {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--accent-cyan);
+    }
+    .visual-stat .lbl {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .auth-brand {
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .auth-headline {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      color: var(--accent-cyan);
+      text-align: center;
+      text-shadow: var(--shadow-cyan);
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+    .auth-sub {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+    .divider span {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .show-pass {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: color 0.3s;
+    }
+    .show-pass:hover { color: var(--accent-cyan); }
+    .input-group-cyber { position: relative; }
+    .pass-wrapper { position: relative; }
+    .link-cyber {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      transition: var(--transition);
+    }
+    .link-cyber:hover { text-shadow: 0 0 10px rgba(0,212,255,0.5); }
+    .error-msg {
+      color: var(--accent-red);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      margin-top: 0.3rem;
+      display: none;
+    }
+    @media (max-width: 900px) {
+      .auth-visual { display: none; }
+      .auth-form-side { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-wrapper">
+  <!-- Visual Side -->
+  <div class="auth-visual">
+    <div class="visual-canvas">
+      <div class="threat-ring" style="width:500px;height:500px;top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+      <div class="threat-ring" style="width:700px;height:700px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:2s"></div>
+      <div class="threat-ring" style="width:900px;height:900px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:4s"></div>
+    </div>
+    <div style="position:relative;z-index:1;width:100%;max-width:400px">
+      <div class="auth-brand">// CyberShield Intelligence Platform</div>
+      <div class="auth-headline">THREAT<br>INTELLIGENCE<br>DASHBOARD</div>
+      <div class="auth-sub">v2.4.1 — Security APIs & Analysis</div>
+
+      <div class="globe-vis">
+        <div class="globe-inner"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="scan-line"></div>
+      </div>
+
+      <div class="stat-row fade-in fade-in-delay-2">
+        <div class="visual-stat">
+          <div class="num" id="c1">0</div>
+          <div class="lbl">APIs Ready</div>
+        </div>
+        <div class="visual-stat">
+          <div class="num" id="c2">0</div>
+          <div class="lbl">Threats DB</div>
+        </div>
+        <div class="visual-stat">
+          <div class="num" id="c3">0</div>
+          <div class="lbl">Data Sources</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Side -->
+  <div class="auth-form-side">
+    <div style="margin-bottom:2.5rem">
+      <a href="index.html" class="nav-brand" style="justify-content:flex-start;margin-bottom:2rem">
+        <div class="brand-icon"><i class="fa-solid fa-lock"></i></div>
+        CYBERSHIELD
+      </a>
+      <div style="font-family:var(--font-display);font-size:1.2rem;color:var(--text-primary);margin-bottom:0.4rem">SECURE LOGIN</div>
+      <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted)">Access your intelligence dashboard</div>
+    </div>
+
+    <div id="alertBox" class="cyber-alert alert-error" style="display:none">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span id="alertMsg">Invalid credentials</span>
+    </div>
+
+    <div class="input-group-cyber fade-in fade-in-delay-1">
+      <label class="input-label"><i class="fa-solid fa-at" style="margin-right:0.4rem"></i>Email Address</label>
+      <input type="email" class="cyber-input" id="email" placeholder="operator@cybershield.io" autocomplete="email">
+      <div class="input-bar"></div>
+    </div>
+
+    <div class="input-group-cyber fade-in fade-in-delay-2">
+      <label class="input-label"><i class="fa-solid fa-key" style="margin-right:0.4rem"></i>Password</label>
+      <div class="pass-wrapper">
+        <input type="password" class="cyber-input" id="password" placeholder="••••••••••••" autocomplete="current-password">
+        <button class="show-pass" onclick="togglePass('password',this)" type="button">
+          <i class="fa-regular fa-eye"></i>
+        </button>
+      </div>
+      <div class="input-bar"></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-family:var(--font-mono);font-size:0.78rem;color:var(--text-secondary)">
+        <input type="checkbox" id="remember" style="accent-color:var(--accent-cyan)"> Remember me
+      </label>
+      <a href="#" class="link-cyber">Forgot password?</a>
+    </div>
+
+    <button class="btn-cyber btn-cyber-full fade-in fade-in-delay-3" onclick="handleLogin()" id="loginBtn">
+      <i class="fa-solid fa-right-to-bracket"></i> AUTHENTICATE
+    </button>
+
+    <div class="divider"><span>OR</span></div>
+
+    <div style="text-align:center;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted)">
+      No account? <a href="register.html" class="link-cyber">Create Operator Profile</a>
+    </div>
+
+    <!-- Terminal output -->
+    <div class="terminal-panel" style="margin-top:2rem">
+      <div class="terminal-header">
+        <div class="terminal-dot" style="background:#ff5f57"></div>
+        <div class="terminal-dot" style="background:#febc2e"></div>
+        <div class="terminal-dot" style="background:#28c840"></div>
+        <span style="font-size:0.65rem;color:var(--text-muted);margin-left:0.5rem">system.auth</span>
+      </div>
+      <div class="terminal-body" id="terminalLog">
+        <div class="terminal-line"><span class="term-prompt">sys@cybershield:~$</span> <span class="term-cmd">init --auth-module</span></div>
+        <div class="terminal-line term-out">[ OK ] Authentication module loaded</div>
+        <div class="terminal-line term-out">[ OK ] MongoDB connection pool initialized</div>
+        <div class="terminal-line term-out">[ OK ] JWT service active</div>
+        <div class="terminal-line"><span class="term-prompt">sys@cybershield:~$</span> <span class="cursor"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  // Counter animation
+  function animCount(id, target, suffix='') {
+    let v = 0;
+    const el = document.getElementById(id);
+    const step = Math.ceil(target / 40);
+    const t = setInterval(() => {
+      v = Math.min(v + step, target);
+      el.textContent = v + suffix;
+      if (v >= target) clearInterval(t);
+    }, 40);
+  }
+  setTimeout(() => { animCount('c1', 20); animCount('c2', 847, 'K'); animCount('c3', 12); }, 500);
+
+  function togglePass(id, btn) {
+    const inp = document.getElementById(id);
+    const icon = btn.querySelector('i');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      icon.className = 'fa-regular fa-eye-slash';
+    } else {
+      inp.type = 'password';
+      icon.className = 'fa-regular fa-eye';
+    }
+  }
+
+  function addTermLine(cls, text) {
+    const log = document.getElementById('terminalLog');
+    const line = document.createElement('div');
+    line.className = `terminal-line ${cls}`;
+    line.textContent = text;
+    log.insertBefore(line, log.lastElementChild);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function showToast(msg, type='info') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    const icons = { success:'fa-check-circle', error:'fa-circle-xmark', info:'fa-circle-info', warning:'fa-triangle-exclamation' };
+    t.className = `cyber-toast ${type}`;
+    t.innerHTML = `<i class="fa-solid ${icons[type]||icons.info}"></i><span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.animation = 'slideOut 0.3s ease forwards'; setTimeout(()=>t.remove(),300); }, 3500);
+  }
+
+  async function handleLogin() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('loginBtn');
+
+    if (!email || !password) {
+      document.getElementById('alertBox').style.display = 'flex';
+      document.getElementById('alertMsg').textContent = 'Email and password are required.';
+      addTermLine('term-err', '[ ERR ] Authentication failed — missing credentials');
+      return;
+    }
+
+    btn.innerHTML = '<span class="cyber-spinner" style="width:16px;height:16px;border-width:2px"></span> AUTHENTICATING...';
+    btn.disabled = true;
+    addTermLine('term-out', `[ -- ] Verifying credentials for ${email}...`);
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        // Token + user live in sessionStorage so they clear when the tab closes,
+        // forcing a fresh login on a newly opened tab. Must match the readers in
+        // dashboard.html and profile.html, which also read from sessionStorage.
+        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('user', JSON.stringify(data.user));
+        addTermLine('term-success', `[ OK ] Access granted — Welcome, ${data.user.name}`);
+        showToast('Authentication successful. Redirecting...', 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 1200);
+      } else {
+        document.getElementById('alertBox').style.display = 'flex';
+        document.getElementById('alertMsg').textContent = data.message || 'Invalid credentials';
+        addTermLine('term-err', '[ ERR ] Authentication failed — invalid credentials');
+        showToast(data.message || 'Login failed', 'error');
+        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> AUTHENTICATE';
+        btn.disabled = false;
+      }
+    } catch (err) {
+      addTermLine('term-err', '[ ERR ] Connection failed — server unreachable');
+      showToast('Server connection failed', 'error');
+      btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> AUTHENTICATE';
+      btn.disabled = false;
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleLogin();
+  });
+
+  // Check if already logged in
+  if (sessionStorage.getItem('token')) window.location.href = 'dashboard.html';
+</script>
+</body>
+</html>
