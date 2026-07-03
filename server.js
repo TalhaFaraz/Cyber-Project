@@ -17,7 +17,7 @@ connectDB();
 
 const app = express();
 
-app.set('trust proxy', 1);   
+app.set('trust proxy', 1);
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
@@ -36,7 +36,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // ─── Serve Frontend Static Files ──────────────────────────────────────────────
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
+// The HTML/CSS/JS files live in the project root (no dist folder)
+app.use(express.static(__dirname));
 
 // ─── Load ONNX Model ──────────────────────────────────────────────────────────
 let session;
@@ -72,16 +73,16 @@ async function getEmbedding(question) {
 
   const result = await session.run(feeds);
   const hiddenState = result[session.outputNames[0]].data;
-  // Better — average all token embeddings
-const size = 384;
-const seqLen = hiddenState.length / size;
-const pooled = new Array(size).fill(0);
-for (let i = 0; i < seqLen; i++) {
-  for (let j = 0; j < size; j++) {
-    pooled[j] += hiddenState[i * size + j];
+  // Average all token embeddings (mean pooling)
+  const size = 384;
+  const seqLen = hiddenState.length / size;
+  const pooled = new Array(size).fill(0);
+  for (let i = 0; i < seqLen; i++) {
+    for (let j = 0; j < size; j++) {
+      pooled[j] += hiddenState[i * size + j];
+    }
   }
-}
-return pooled.map(v => v / seqLen);
+  return pooled.map(v => v / seqLen);
 }
 
 async function findAnswer(question) {
@@ -153,7 +154,8 @@ app.get('/api/health', (req, res) => {
 // ─── Serve Frontend for all non-API routes (SPA support) ──────────────────────
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+    // index.html lives in the project root
+    res.sendFile(path.join(__dirname, 'index.html'));
   } else {
     res.status(404).json({ success: false, message: 'API endpoint not found.' });
   }
